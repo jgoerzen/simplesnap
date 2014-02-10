@@ -1,0 +1,146 @@
+#!/bin/bash
+
+# Simple Snapshot Command Wrapper
+# Copyright (c) 2014 John Goerzen
+#   This program is free software: you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation, either version 3 of the License, or
+#   (at your option) any later version.
+#
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+set -e
+ZFSCMD=/sbin/zfs
+ZFS=runzfs
+EXCLUDEPROP="org.complete.simplesnap:exclude"
+
+logit () {
+   logger -p info -t "`basename $0`[$$]" "$1"
+}
+
+exiterror () {
+   logit "$1"
+   exit 10
+}
+
+runzfs () {
+  logit "Running: $ZFSCMD $*"
+  $ZFSCMD "$@"
+}
+
+# template - $1
+# dataset - $2
+listsnaps () {
+   $ZFS list -t snapshot -r -d 1 -H -o name "$2" | grep "@$1" || true
+}
+
+PATTERN="^[a-zA-Z0-9_/. -]\+\$"
+if [ "$1" = "reinvoked" ]; then
+  shift
+  logit "Reinvoked with paramters \"$*\""
+  shift # Drop the call to simplesnapwrap
+
+  # Validate again.  Just to be sure.
+  echo ".$*" | grep -q "${PATTERN}" || exiterror "Invalid characters found on re-validate; pattern is ${PATTERN}"
+  echo ".$*" | grep -vq '\.\.' || exiterror "Found .. in input; aborting."
+
+  # We don't want any paramters to contain a space or leading dash.
+  for ARG; do
+    echo ",${ARG}" | grep -vq '^,-' || exiterror "Found leading '-' in parameter \"${ARG}\"; aborting."
+    echo ",${ARG}" | grep -vq ' ' || exiterror "Found space in parameters; aborting."
+  done
+  MODE="$1"
+  shift || exiterror "Missing mode."
+  case "$MODE" in
+    "listfs")
+       logit "Listing ZFS datasets without ${EXCLUDEPROP}=on"
+       $ZFS list -t filesystem,volume -o "name,${EXCLUDEPROP}" -H | \
+          grep -v $'\ton$' | sed $'s/\t.*$//'
+       ;;
+    "sendback")
+       # Next lines shared with reap
+       TEMPLATE="__simplesnap_$1_"
+       TEMPLATEPATTERN="^[a-zA-Z0-9_]\+\$"
+       echo "_$TEMPLATE" | grep -q "${TEMPLATEPATTERN}" || exiterror "Invalid characters in sendback template; pattern is ${TEMPLATEPATTERN}"
+       DATASET="$2"
+       echo "_${DATASET}" | grep -vq " " || exiterror "Space found in dataset name"
+       [ -z "${DATASET}" ] && exiterror "No dataset given."
+       [ -z "$1" ] && exiterror "No template given."
+
+       logit "Listing snapshots on \"${DATASET}\" with template \"${TEMPLATE}\""
+
+       OLDESTSNAP="`listsnaps \"${TEMPLATE}\" \"${DATASET}\" | head -n 1`"
+       if [ -z "${OLDESTSNAP}" ]; then
+         logit "Found no existing snapshot."
+       else
+         logit "Will use ${OLDESTSNAP} as basis."
+       fi
+
+       # Make a new snapshot.
+       NEWSNAP="${TEMPLATE}`date +%F_%T`__"
+       NEWFULLSNAP="${DATASET}@${NEWSNAP}"
+       logit "Making snapshot ${NEWFULLSNAP}"
+       $ZFS snapshot "${NEWFULLSNAP}"
+
+       if [ -z "${OLDESTSNAP}" ]; then
+         # No existing snapshot.  Send the whole thing.
+         logit "Sending non-incremental stream."
+         $ZFS send "${NEWFULLSNAP}"
+       else
+         # Use the oldest existing snapshot.
+         logit "Sending incremental stream back to ${OLDESTSNAP}"
+         $ZFS send -I "${OLDESTSNAP}" "${NEWFULLSNAP}"
+       fi
+       ;;
+    "reap")
+       # Next lines shared with sendback
+       TEMPLATE="__simplesnap_$1_"
+       TEMPLATEPATTERN="^[a-zA-Z0-9_]\+\$"
+       echo "_$TEMPLATE" | grep -q "${TEMPLATEPATTERN}" || exiterror "Invalid characters in reap template; pattern is ${TEMPLATEPATTERN}"
+       DATASET="$2"
+       echo "_${DATASET}" | grep -vq " " || exiterror "Space found in dataset name"
+       [ -z "${DATASET}" ] && exiterror "No dataset given."
+       [ -z "$1" ] && exiterror "No template given."
+        
+       # We always save the most recent.
+       SNAPSTOREMOVE="`listsnaps \"${TEMPLATE}\" \"${DATASET}\" | head -n -1`"
+       if [ -z "${SNAPSTOREMOVE}" ]; then
+         logit "No snapshots to remove."
+       else
+         for REMOVAL in ${SNAPSTOREMOVE}; do
+            logit "Destroying snapshot ${REMOVAL}"
+            echo "_${REMOVAL}" | grep -q '@' || exiterror "PANIC: snapshot name doesn't contain '@'"
+            $ZFS destroy "${REMOVAL}"
+         done
+       fi
+       ;;
+    *)
+       exiterror "Invalid mode \"${MODE}\" specified."
+       ;;
+    esac
+  exit 0
+fi
+
+CMD="${SSH_ORIGINAL_COMMAND}"
+
+logit "Invoked with parameters \"$*\" and SSH_ORIGINAL_COMMAND: \"${CMD}\""
+
+if [ -z "${SSH_ORIGINAL_COMMAND}"]; then
+  echo "This program is to be run from ssh."
+  exiterror "Not run from ssh."
+fi
+
+# Sanitize input.  We don't want special characters here.
+
+echo ".${CMD}" | grep -q "${PATTERN}" || exiterror "Invalid characters in input; pattern is: ${PATTERN}"
+echo ".${CMD}" | grep -vq '\.\.' || exiterror "Found .. in input; aborting."
+
+logit "Reinvoking to parse parameters"
+exec "$0" reinvoked ${CMD}
+
