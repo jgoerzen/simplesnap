@@ -29,7 +29,7 @@ exiterror () {
 }
 
 syntaxerror () {
-   cat <<EOF
+   cat <<"EOF"
 Syntax: $0 [--sshcmd CMD] --store SORE --setname NAME --host HOST
 
 Required:
@@ -37,17 +37,17 @@ Required:
   --store: gives the ZFS dataset name where data will be stored.  Mountpoint
            is inferred.
   --setname: Gives the backup set name.  Can just be a made-up word
-             if multiple sets aren't needed; for instance, the hostname
+             if multiple sets aren not needed; for instance, the hostname
              of the backup server.  This is used in the snapshot name.
   --host: Gives the hostname to back up.
 
 Optional:
 
   --sshcmd: Gives the SSH command.  Defaults to "ssh".  Example:
-            --sshcmd "-i ~/.id_rsa_simplesnap"
+            --sshcmd \"-i ~/.id_rsa_simplesnap\"
   --remotecmd: Gives the path to simplesnapwrap on the remote.
                Not usually relevant, since this is set in
-               ~/.ssh/authorized_keys.  Default: "simplesnapwrap"
+               ~/.ssh/authorized_keys.  Default: \"simplesnapwrap\"
 
 EOF
   exiterror "Syntax error: $1"
@@ -55,13 +55,14 @@ EOF
 
 while [ -n "$1" ]; do
   case "$1" in
-    "--sshcommand")
+    "--sshcmd")
       SSHCMD="$2"
       shift 2
       ;;
-    "--remotecommand")
+    "--remotecmd")
       REMOTECMD="$2"
       shift 2
+      ;;
     "--store")
       STORE="$2"
       shift 2
@@ -84,16 +85,16 @@ SSHCMD="${SSHCMD:-ssh}"
 REMOTECMD="${REMOTECMD:-simplesnapwrap}"
 
 # Validating
-[ -n "$SSHCMD" ] | syntaxerror "Invalid SSH command: $SSHCMD"
-[ -n "$STORE" ] | syntaxerror "Missing --store"
-[ -n "$SETNAME" ] | syntaxerror "Missing --setname"
-[ -n "$HOST" ] | syntaxerror "Missing --host"
+[ -n "$SSHCMD" ] || syntaxerror "Invalid SSH command: $SSHCMD"
+[ -n "$STORE" ] || syntaxerror "Missing --store"
+[ -n "$SETNAME" ] || syntaxerror "Missing --setname"
+[ -n "$HOST" ] || syntaxerror "Missing --host"
 
 PATTERN="^[a-zA-Z0-9_/. -]\+\$"
 
 echo "_${STORE}" | grep -qv " " || syntaxerror "Space in --store: ${STORE}"
 echo "_${SETNAME}" | grep -q "${PATTERN}" || syntaxerror "Invalid characters in setname \"${SETNAME}\"; pattern is \"${PATTERN}\""
-echo "_${SETNAME}" | grep -qv '^_-' || syntaxerror "Set name cannot begin with a dash: \"${SETNAME\""
+echo "_${SETNAME}" | grep -qv '^_-' || syntaxerror "Set name cannot begin with a dash: \"${SETNAME}\""
 
 MOUNTPOINT="`zfs list -H -o mountpoint -t filesystem \"${STORE}\"`"
 
@@ -106,7 +107,7 @@ LOCKFILE="${MOUNTPOINT}/.lock"
 if dotlockfile -l -p "${LOCKFILE}"; then
   LOCKMETHOD="dotlockfile"
   logit "Lock obtained at ${LOCKFILE} with dotlockfile"
-  trap "ECODE=$?; dotlockfile -u \"${LOCKFILE}\"" EXIT INT TERM
+  trap "ECODE=$?; dotlockfile -u \"${LOCKFILE}\"; exit $?" EXIT INT TERM
 else
   RETVAL="$?"
   if [ "$RETVAL" = "127" ]; then
@@ -123,7 +124,7 @@ fi
 
 runwrap () {
   logit "Running $SSHCMD $REMOTECMD $*"
-  $SSHCMD $REMOTECMD "$@"
+  $SSHCMD ${HOST} $REMOTECMD "$@"
 }
 
 runzfs () {
@@ -138,7 +139,7 @@ fi
 # template - $1
 # dataset - $2
 listsnaps () {
-   $ZFS list -t snapshot -r -d 1 -H -o name "$2" | grep "@$1" || true
+   runzfs list -t snapshot -r -d 1 -H -o name "$2" | grep "@$1" || true
 }
 
 reap () {
@@ -151,7 +152,7 @@ reap () {
        else
          for REMOVAL in ${SNAPSTOREMOVE}; do
             logit "Destroying snapshot ${REMOVAL}"
-            echo "_${REMOVAL}" | grep -q '@' || exiterror "PANIC: snapshot name doesn't contain '@'"
+            echo "_${REMOVAL}" | grep -q '@' || exiterror "PANIC: snapshot name doesn not contain @"
             runzfs destroy "${REMOVAL}"
          done
        fi
@@ -159,12 +160,16 @@ reap () {
   
 
 logit "Finding remote datasets to back up"
-for DATASET in runwrap listfs; do
+
+runwrap listfs
+
+REMOTEDATASETS="`runwrap listfs`"
+for DATASET in ${REMOTEDATASETS}; do
   if runwrap sendback "${SETNAME}" "${DATASET}" | \
-     runzfs receive -f "${STORE}/${HOST}/${DATASET}"; then
-     logit "Received backup into ${STORE}/${HOST}/${DATASET}."
-     runwrap reap "${SETNAME}" "${DATASET}"
-     reap "${STORE}/${HOST}/${DATASET}"
+     runzfs receive -F "${STORE}/${HOST}/${DATASET}"; then
+      logit "Received backup into ${STORE}/${HOST}/${DATASET}."
+      runwrap reap "${SETNAME}" "${DATASET}"
+      reap "${STORE}/${HOST}/${DATASET}"
   fi
 done
 
