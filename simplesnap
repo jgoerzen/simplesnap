@@ -161,8 +161,6 @@ reap () {
 
 logit "Finding remote datasets to back up"
 
-runwrap listfs
-
 REMOTEDATASETS="`runwrap listfs`"
 for DATASET in ${REMOTEDATASETS}; do
   if runwrap sendback "${SETNAME}" "${DATASET}" | \
