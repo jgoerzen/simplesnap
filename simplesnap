@@ -30,7 +30,7 @@ exiterror () {
 
 syntaxerror () {
    cat <<EOF
-Syntax: $0 [--sshcmd CMD] --store SORE --setname NAME --host HOST
+Syntax: $0 [--sshcmd CMD] [--local] --store SORE --setname NAME --host HOST
 
 Required:
 
@@ -45,10 +45,11 @@ Optional:
 
   --sshcmd: Gives the SSH command.  Defaults to "ssh".  Example:
             --sshcmd "-i ~/.id_rsa_simplesnap"
-  --remotecmd: Gives the path to simplesnapwrap on the remote.
-               Not usually relevant, since this is set in
-               ~/.ssh/authorized_keys.  Default: "simplesnapwrap"
-
+  --wrapcmd: Gives the path to simplesnapwrap on the remote
+             (or local machine, if --local is present).
+             Not usually relevant, since this is set in
+             ~/.ssh/authorized_keys.  Default: "simplesnapwrap"
+  --local: The host is localhost; do not use remote tool to access it.
 EOF
   exiterror "Syntax error: $1"
 }
@@ -59,8 +60,8 @@ while [ -n "$1" ]; do
       SSHCMD="$2"
       shift 2
       ;;
-    "--remotecmd")
-      REMOTECMD="$2"
+    "--wrapcmd")
+      WRAPCMD="$2"
       shift 2
       ;;
     "--store")
@@ -75,6 +76,10 @@ while [ -n "$1" ]; do
       HOST="$2"
       shift 2
       ;;
+    "--local")
+      LOCALMODE="on"
+      shift
+      ;;
     *)
       syntaxerror "Unknown option \"$1\""
       ;;
@@ -82,7 +87,7 @@ while [ -n "$1" ]; do
 done
 
 SSHCMD="${SSHCMD:-ssh}"
-REMOTECMD="${REMOTECMD:-simplesnapwrap}"
+WRAPCMD="${WRAPCMD:-simplesnapwrap}"
 
 # Validating
 [ -n "$SSHCMD" ] || syntaxerror "Invalid SSH command: $SSHCMD"
@@ -123,8 +128,13 @@ fi
 # Obtain a list of filesystems.
 
 runwrap () {
-  logit "Running $SSHCMD $REMOTECMD $*"
-  $SSHCMD ${HOST} $REMOTECMD "$@"
+  if [ "$LOCALMODE" = "on" ]; then
+    logit "Running on localhost: $WRAPCMD $*"
+    "${WRAPCMD}" "$@"
+  else
+    logit "Running $SSHCMD $WRAPCMD $*"
+    ${SSHCMD} ${HOST} ${WRAPCMD} "$@"
+  fi
 }
 
 runzfs () {
