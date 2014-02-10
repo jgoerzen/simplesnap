@@ -90,6 +90,9 @@ while [ -n "$1" ]; do
       ;;
     "--check")
       CHECKMODE="$2"
+      if [ -z "$CHECKMODE" ] ; then
+          syntaxerror "--check requires a paremter"
+      fi
       shift 2
       ;;
     "--local")
@@ -139,6 +142,11 @@ listsnaps () {
 
 CHECKRETVAL=0
 
+runzfs () {
+  logit "Running /sbin/zfs $*"
+  /sbin/zfs "$@"
+}
+
 checkbackups () {
   CHECKHOST="$1"
   DATASETS="`runzfs list -t filesystem,volume -o name -H -r \"${STORE}/${HOST}\"`"
@@ -166,6 +174,7 @@ if [ -n "$CHECKMODE" ]; then
   else
     for HOST in *; do checkbackups "$HOST"; done
   fi
+  logit "check: exiting with value $CHECKRETVAL"
   exit $CHECKRETVAL
 fi
 
@@ -177,11 +186,6 @@ runwrap () {
     logit "Running $SSHCMD $WRAPCMD $*"
     ${SSHCMD} ${HOST} ${WRAPCMD} "$@"
   fi
-}
-
-runzfs () {
-  logit "Running /sbin/zfs $*"
-  /sbin/zfs "$@"
 }
 
 if [ ! -d "${MOUNTPOINT}/${HOST}" ]; then
