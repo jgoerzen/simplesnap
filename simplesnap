@@ -50,7 +50,7 @@ Required:
 Optional:
 
   --sshcmd: Gives the SSH command.  Defaults to "ssh".  Example:
-            --sshcmd "-i ~/.id_rsa_simplesnap"
+            --sshcmd "ssh -i /root/.id_rsa_simplesnap"
   --wrapcmd: Gives the path to simplesnapwrap on the remote
              (or local machine, if --local is present).
              Not usually relevant, since this is set in
@@ -119,10 +119,9 @@ ggrep &> /dev/null || GREP="grep"
 [ -n "$SETNAME" ] || syntaxerror "Missing --setname"
 [ -n "$CHECKMODE" -o -n "$HOST" ] || syntaxerror "Missing --host"
 
-PATTERN="^[a-zA-Z0-9_/. -]\+\$"
-
 echo "_${STORE}" | $GREP -qv " " || syntaxerror "Space in --store: ${STORE}"
-echo "_${SETNAME}" | $GREP -q "${PATTERN}" || syntaxerror "Invalid characters in setname \"${SETNAME}\"; pattern is \"${PATTERN}\""
+TEMPLATEPATTERN="^[a-zA-Z0-9]\+\$"
+echo "a${SETNAME}" | $GREP -q "${TEMPLATEPATTERN}" || syntaxerror "Invalid characters in setname \"${SETNAME}\"; pattern is \"${TEMPLATEPATTERN}\""
 echo "_${SETNAME}" | $GREP -qv '^_-' || syntaxerror "Set name cannot begin with a dash: \"${SETNAME}\""
 TEMPLATE="__simplesnap_${SETNAME}_"
 

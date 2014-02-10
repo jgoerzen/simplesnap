@@ -74,7 +74,7 @@ if [ "$1" = "reinvoked" ]; then
     "sendback")
        # Next lines shared with reap
        TEMPLATE="__simplesnap_$1_"
-       TEMPLATEPATTERN="^[a-zA-Z0-9_]\+\$"
+       TEMPLATEPATTERN="^[a-zA-Z0-9]\+\$"
        echo "_$TEMPLATE" | $GREP -q "${TEMPLATEPATTERN}" || exiterror "Invalid characters in sendback template; pattern is ${TEMPLATEPATTERN}"
        DATASET="$2"
        echo "_${DATASET}" | $GREP -vq " " || exiterror "Space found in dataset name"

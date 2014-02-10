@@ -118,7 +118,10 @@ zfs create tank/simplesnap
 
 Now, you can run the backup:
 
-simplesnap --host serverhost --setname mainset --store tank/simplesnap
+simplesnap --host serverhost --setname mainset \
+  --store tank/simplesnap \
+  --sshcmd "ssh -i /root/.ssh/id_rsa_simplesnap"
+
 
 You can monitor progress in /var/log/syslog.  If all goes well, you
 will see filesystems start to be populated under tank/simplesnap/host.
