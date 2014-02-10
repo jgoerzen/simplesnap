@@ -131,7 +131,7 @@ CMD="${SSH_ORIGINAL_COMMAND}"
 
 logit "Invoked with parameters \"$*\" and SSH_ORIGINAL_COMMAND: \"${CMD}\""
 
-if [ -z "${SSH_ORIGINAL_COMMAND}"]; then
+if [ -z "${SSH_ORIGINAL_COMMAND}" ]; then
   echo "This program is to be run from ssh."
   exiterror "Not run from ssh."
 fi
