@@ -169,27 +169,6 @@ if [ -n "$CHECKMODE" ]; then
   exit $CHECKRETVAL
 fi
 
-
-LOCKFILE="${MOUNTPOINT}/.lock"
-
-if dotlockfile -l -p "${LOCKFILE}"; then
-  LOCKMETHOD="dotlockfile"
-  logit "Lock obtained at ${LOCKFILE} with dotlockfile"
-  trap "ECODE=$?; dotlockfile -u \"${LOCKFILE}\"; exit $?" EXIT INT TERM
-else
-  RETVAL="$?"
-  if [ "$RETVAL" = "127" ]; then
-    LOCKMETHOD="mkdir"
-    mkdir "${LOCKFILE}" || exiterror "Could not obtain lock at ${LOCKFILE}; if $0 is not already running, rmdir that path."
-    logit "Lock obtained at ${LOCKFILE} with mkdir"
-    trap "ECODE=$?; rmdir \"${LOCKFILE}\"" EXIT INT TERM
-  else
-    exiterror "Could not obtain lock at ${LOCKFILE}; $0 likely already running."
-  fi
-fi
-
-# Obtain a list of filesystems.
-
 runwrap () {
   if [ "$LOCALMODE" = "on" ]; then
     logit "Running on localhost: $WRAPCMD reinvoked $*"
@@ -208,6 +187,25 @@ runzfs () {
 if [ ! -d "${MOUNTPOINT}/${HOST}" ]; then
   runzfs create "${STORE}/${HOST}"
 fi
+
+LOCKFILE="${MOUNTPOINT}/${HOST}/.lock"
+
+if dotlockfile -l -p "${LOCKFILE}"; then
+  LOCKMETHOD="dotlockfile"
+  logit "Lock obtained at ${LOCKFILE} with dotlockfile"
+  trap "ECODE=$?; dotlockfile -u \"${LOCKFILE}\"; exit $?" EXIT INT TERM
+else
+  RETVAL="$?"
+  if [ "$RETVAL" = "127" ]; then
+    LOCKMETHOD="mkdir"
+    mkdir "${LOCKFILE}" || exiterror "Could not obtain lock at ${LOCKFILE}; if $0 is not already running, rmdir that path."
+    logit "Lock obtained at ${LOCKFILE} with mkdir"
+    trap "ECODE=$?; rmdir \"${LOCKFILE}\"" EXIT INT TERM
+  else
+    exiterror "Could not obtain lock at ${LOCKFILE}; $0 likely already running."
+  fi
+fi
+
 
 reap () {
   DATASET="$1"
