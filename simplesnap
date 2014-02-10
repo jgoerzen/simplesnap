@@ -30,7 +30,13 @@ exiterror () {
 
 syntaxerror () {
    cat <<EOF
-Syntax: $0 [--sshcmd CMD] [--local] --store SORE --setname NAME --host HOST
+Syntax: 
+
+$0 [--sshcmd CMD] [--local] --store SORE --setname NAME --host HOST
+
+or
+
+$0 --check TIMEFRAME --store STORE --setname NAME [--host HOST]
 
 Required:
 
@@ -50,6 +56,12 @@ Optional:
              Not usually relevant, since this is set in
              ~/.ssh/authorized_keys.  Default: "simplesnapwrap"
   --local: The host is localhost; do not use remote tool to access it.
+  --check: Do not back up, but check existing backups.  If any are
+           older than TIMEFRAME, print an error and exit with a nonzero
+           code.  Scans all hosts unless a specific host is given with
+           --host.  The parameter is in the format given to date/gdate: 
+           for instance, --check "30 days ago".  Remember to enclose it
+           in quotes if it contains spaces.
 EOF
   exiterror "Syntax error: $1"
 }
@@ -76,6 +88,10 @@ while [ -n "$1" ]; do
       HOST="$2"
       shift 2
       ;;
+    "--check")
+      CHECKMODE="$2"
+      shift 2
+      ;;
     "--local")
       LOCALMODE="on"
       shift
@@ -93,19 +109,59 @@ WRAPCMD="${WRAPCMD:-simplesnapwrap}"
 [ -n "$SSHCMD" ] || syntaxerror "Invalid SSH command: $SSHCMD"
 [ -n "$STORE" ] || syntaxerror "Missing --store"
 [ -n "$SETNAME" ] || syntaxerror "Missing --setname"
-[ -n "$HOST" ] || syntaxerror "Missing --host"
+[ -n "$CHECKMODE" -o -n "$HOST" ] || syntaxerror "Missing --host"
 
 PATTERN="^[a-zA-Z0-9_/. -]\+\$"
 
 echo "_${STORE}" | grep -qv " " || syntaxerror "Space in --store: ${STORE}"
 echo "_${SETNAME}" | grep -q "${PATTERN}" || syntaxerror "Invalid characters in setname \"${SETNAME}\"; pattern is \"${PATTERN}\""
 echo "_${SETNAME}" | grep -qv '^_-' || syntaxerror "Set name cannot begin with a dash: \"${SETNAME}\""
+TEMPLATE="__simplesnap_${SETNAME}_"
 
 MOUNTPOINT="`zfs list -H -o mountpoint -t filesystem \"${STORE}\"`"
 
 logit "Store ${STORE} is mounted at ${MOUNTPOINT}"
 
 cd "${MOUNTPOINT}"
+
+# template - $1
+# dataset - $2
+listsnaps () {
+   runzfs list -t snapshot -r -d 1 -H -o name "$2" | grep "@$1" || true
+}
+
+CHECKRETVAL=0
+
+checkbackups () {
+  CHECKHOST="$1"
+  DATASETS="`runzfs list -t filesystem,volume -o name -H -r \"${STORE}/${HOST}\"`"
+  CUTOFF="`date -d \"${CHECKMODE}\" +%s`"
+  for CHECKDS in ${DATASETS}; do
+    FOUNDOK=0
+    # Extract timestamps
+    for TIMESTAMP in listsnaps "$TEMPLATE" "$CHECKDS" | sed 's/^.*_\([^_]\+__\)$/\1/'; do
+        TSSEC=`date -d "${TIMESTAMP}" +%s`
+        if [ "$TSSEC" -gt "$CUTOFF" ]; 
+            then FOUNDOK=1
+        fi
+    done
+    if [ "$FOUNDOK" = "0" ]; then
+        echo "${CHECKDS} last back up is too old!" 1>&2
+        CHECKRETVAL=10
+    fi
+  done 
+}
+
+if [ -n "$CHECKMODE" ]; then
+  # Do a check only.
+  if [ -n "$HOST" ]; then
+    checkbackups "$HOST"
+  else
+    for HOST in *; do checkbackups "$HOST"; done
+  fi
+  exit $CHECKRETVAL
+fi
+
 
 LOCKFILE="${MOUNTPOINT}/.lock"
 
@@ -146,14 +202,7 @@ if [ ! -d "${MOUNTPOINT}/${HOST}" ]; then
   runzfs create "${STORE}/${HOST}"
 fi
 
-# template - $1
-# dataset - $2
-listsnaps () {
-   runzfs list -t snapshot -r -d 1 -H -o name "$2" | grep "@$1" || true
-}
-
 reap () {
-  TEMPLATE="__simplesnap_${SETNAME}_"
   DATASET="$1"
        # We always save the most recent.
        SNAPSTOREMOVE="`listsnaps \"${TEMPLATE}\" \"${DATASET}\" | head -n -1`"

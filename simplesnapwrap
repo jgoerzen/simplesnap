@@ -83,7 +83,7 @@ if [ "$1" = "reinvoked" ]; then
        fi
 
        # Make a new snapshot.
-       NEWSNAP="${TEMPLATE}`date +%F_%T`__"
+       NEWSNAP="${TEMPLATE}`date +%FT%T`__"
        NEWFULLSNAP="${DATASET}@${NEWSNAP}"
        logit "Making snapshot ${NEWFULLSNAP}"
        $ZFS snapshot "${NEWFULLSNAP}"
