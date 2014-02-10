@@ -153,7 +153,7 @@ checkbackups () {
   CUTOFF="`$DATE -d \"${CHECKMODE}\" +%s`"
   for CHECKDS in ${DATASETS}; do
     # Don't check the top-level host dataset itself.
-    if [ "${CHECKDS}" = "${STORE}/${HOST}" ];
+    if [ "${CHECKDS}" = "${STORE}/${HOST}" ]; then
         continue
     fi
 
@@ -166,7 +166,7 @@ checkbackups () {
         fi
     done
     if [ "$FOUNDOK" = "0" ]; then
-        echo "${CHECKDS} last back up is too old!" 1>&2
+        echo "${CHECKDS} last back up is too old; created at `$DATE -d \"@${TSSEC}\"` but cutoff is `$DATE -d \"@${CUTOFF}\"`!" 1>&2
         CHECKRETVAL=10
     fi
   done 
