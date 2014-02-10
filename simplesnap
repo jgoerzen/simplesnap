@@ -146,7 +146,7 @@ checkbackups () {
   for CHECKDS in ${DATASETS}; do
     FOUNDOK=0
     # Extract timestamps
-    for TIMESTAMP in listsnaps "$TEMPLATE" "$CHECKDS" | $SED 's/^.*_\([^_]\+__\)$/\1/'; do
+    for TIMESTAMP in `listsnaps "$TEMPLATE" "$CHECKDS" | $SED 's/^.*_\([^_]\+__\)$/\1/'`; do
         TSSEC=`$DATE -d "${TIMESTAMP}" +%s`
         if [ "$TSSEC" -gt "$CUTOFF" ]; 
             then FOUNDOK=1
