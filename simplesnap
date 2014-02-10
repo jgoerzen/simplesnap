@@ -29,7 +29,7 @@ exiterror () {
 }
 
 syntaxerror () {
-   cat <<"EOF"
+   cat <<EOF
 Syntax: $0 [--sshcmd CMD] --store SORE --setname NAME --host HOST
 
 Required:
@@ -44,10 +44,10 @@ Required:
 Optional:
 
   --sshcmd: Gives the SSH command.  Defaults to "ssh".  Example:
-            --sshcmd \"-i ~/.id_rsa_simplesnap\"
+            --sshcmd "-i ~/.id_rsa_simplesnap"
   --remotecmd: Gives the path to simplesnapwrap on the remote.
                Not usually relevant, since this is set in
-               ~/.ssh/authorized_keys.  Default: \"simplesnapwrap\"
+               ~/.ssh/authorized_keys.  Default: "simplesnapwrap"
 
 EOF
   exiterror "Syntax error: $1"
