@@ -152,9 +152,14 @@ checkbackups () {
   DATASETS="`runzfs list -t filesystem,volume -o name -H -r \"${STORE}/${HOST}\"`"
   CUTOFF="`$DATE -d \"${CHECKMODE}\" +%s`"
   for CHECKDS in ${DATASETS}; do
+    # Don't check the top-level host dataset itself.
+    if [ "${CHECKDS}" = "${STORE}/${HOST}" ];
+        continue
+    fi
+
     FOUNDOK=0
     # Extract timestamps
-    for TIMESTAMP in `listsnaps "$TEMPLATE" "$CHECKDS" | $SED 's/^.*_\([^_]\+__\)$/\1/'`; do
+    for TIMESTAMP in `listsnaps "$TEMPLATE" "$CHECKDS" | $SED 's/^.*_\([^_]\+\)__$/\1/'`; do
         TSSEC=`$DATE -d "${TIMESTAMP}" +%s`
         if [ "$TSSEC" -gt "$CUTOFF" ]; 
             then FOUNDOK=1
