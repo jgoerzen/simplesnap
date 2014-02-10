@@ -105,6 +105,14 @@ done
 SSHCMD="${SSHCMD:-ssh}"
 WRAPCMD="${WRAPCMD:-simplesnapwrap}"
 
+DATE="gdate"
+gdate &> /dev/null || DATE="date"
+SED="gsed"
+gsed &> /dev/null || SED="sed"
+GREP="ggrep"
+ggrep &> /dev/null || GREP="grep"
+
+
 # Validating
 [ -n "$SSHCMD" ] || syntaxerror "Invalid SSH command: $SSHCMD"
 [ -n "$STORE" ] || syntaxerror "Missing --store"
@@ -113,9 +121,9 @@ WRAPCMD="${WRAPCMD:-simplesnapwrap}"
 
 PATTERN="^[a-zA-Z0-9_/. -]\+\$"
 
-echo "_${STORE}" | grep -qv " " || syntaxerror "Space in --store: ${STORE}"
-echo "_${SETNAME}" | grep -q "${PATTERN}" || syntaxerror "Invalid characters in setname \"${SETNAME}\"; pattern is \"${PATTERN}\""
-echo "_${SETNAME}" | grep -qv '^_-' || syntaxerror "Set name cannot begin with a dash: \"${SETNAME}\""
+echo "_${STORE}" | $GREP -qv " " || syntaxerror "Space in --store: ${STORE}"
+echo "_${SETNAME}" | $GREP -q "${PATTERN}" || syntaxerror "Invalid characters in setname \"${SETNAME}\"; pattern is \"${PATTERN}\""
+echo "_${SETNAME}" | $GREP -qv '^_-' || syntaxerror "Set name cannot begin with a dash: \"${SETNAME}\""
 TEMPLATE="__simplesnap_${SETNAME}_"
 
 MOUNTPOINT="`zfs list -H -o mountpoint -t filesystem \"${STORE}\"`"
@@ -127,7 +135,7 @@ cd "${MOUNTPOINT}"
 # template - $1
 # dataset - $2
 listsnaps () {
-   runzfs list -t snapshot -r -d 1 -H -o name "$2" | grep "@$1" || true
+   runzfs list -t snapshot -r -d 1 -H -o name "$2" | $GREP "@$1" || true
 }
 
 CHECKRETVAL=0
@@ -135,12 +143,12 @@ CHECKRETVAL=0
 checkbackups () {
   CHECKHOST="$1"
   DATASETS="`runzfs list -t filesystem,volume -o name -H -r \"${STORE}/${HOST}\"`"
-  CUTOFF="`date -d \"${CHECKMODE}\" +%s`"
+  CUTOFF="`$DATE -d \"${CHECKMODE}\" +%s`"
   for CHECKDS in ${DATASETS}; do
     FOUNDOK=0
     # Extract timestamps
-    for TIMESTAMP in listsnaps "$TEMPLATE" "$CHECKDS" | sed 's/^.*_\([^_]\+__\)$/\1/'; do
-        TSSEC=`date -d "${TIMESTAMP}" +%s`
+    for TIMESTAMP in listsnaps "$TEMPLATE" "$CHECKDS" | $SED 's/^.*_\([^_]\+__\)$/\1/'; do
+        TSSEC=`$DATE -d "${TIMESTAMP}" +%s`
         if [ "$TSSEC" -gt "$CUTOFF" ]; 
             then FOUNDOK=1
         fi
@@ -211,7 +219,7 @@ reap () {
        else
          for REMOVAL in ${SNAPSTOREMOVE}; do
             logit "Destroying snapshot ${REMOVAL}"
-            echo "_${REMOVAL}" | grep -q '@' || exiterror "PANIC: snapshot name doesn not contain @"
+            echo "_${REMOVAL}" | $GREP -q '@' || exiterror "PANIC: snapshot name doesn not contain @"
             runzfs destroy "${REMOVAL}"
          done
        fi

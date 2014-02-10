@@ -34,10 +34,18 @@ runzfs () {
   $ZFSCMD "$@"
 }
 
+DATE="gdate"
+gdate &> /dev/null || DATE="date"
+SED="gsed"
+gsed &> /dev/null || SED="sed"
+GREP="ggrep"
+ggrep &> /dev/null || GREP="grep"
+
+
 # template - $1
 # dataset - $2
 listsnaps () {
-   $ZFS list -t snapshot -r -d 1 -H -o name "$2" | grep "@$1" || true
+   $ZFS list -t snapshot -r -d 1 -H -o name "$2" | $GREP "@$1" || true
 }
 
 PATTERN="^[a-zA-Z0-9_/. -]\+\$"
@@ -47,13 +55,13 @@ if [ "$1" = "reinvoked" ]; then
   shift # Drop the call to simplesnapwrap
 
   # Validate again.  Just to be sure.
-  echo ".$*" | grep -q "${PATTERN}" || exiterror "Invalid characters found on re-validate; pattern is ${PATTERN}"
-  echo ".$*" | grep -vq '\.\.' || exiterror "Found .. in input; aborting."
+  echo ".$*" | $GREP -q "${PATTERN}" || exiterror "Invalid characters found on re-validate; pattern is ${PATTERN}"
+  echo ".$*" | $GREP -vq '\.\.' || exiterror "Found .. in input; aborting."
 
   # We don't want any paramters to contain a space or leading dash.
   for ARG; do
-    echo ",${ARG}" | grep -vq '^,-' || exiterror "Found leading '-' in parameter \"${ARG}\"; aborting."
-    echo ",${ARG}" | grep -vq ' ' || exiterror "Found space in parameters; aborting."
+    echo ",${ARG}" | $GREP -vq '^,-' || exiterror "Found leading '-' in parameter \"${ARG}\"; aborting."
+    echo ",${ARG}" | $GREP -vq ' ' || exiterror "Found space in parameters; aborting."
   done
   MODE="$1"
   shift || exiterror "Missing mode."
@@ -61,15 +69,15 @@ if [ "$1" = "reinvoked" ]; then
     "listfs")
        logit "Listing ZFS datasets without ${EXCLUDEPROP}=on"
        $ZFS list -t filesystem,volume -o "name,${EXCLUDEPROP}" -H | \
-          grep -v $'\ton$' | sed $'s/\t.*$//'
+          $GREP -v $'\ton$' | $SED $'s/\t.*$//'
        ;;
     "sendback")
        # Next lines shared with reap
        TEMPLATE="__simplesnap_$1_"
        TEMPLATEPATTERN="^[a-zA-Z0-9_]\+\$"
-       echo "_$TEMPLATE" | grep -q "${TEMPLATEPATTERN}" || exiterror "Invalid characters in sendback template; pattern is ${TEMPLATEPATTERN}"
+       echo "_$TEMPLATE" | $GREP -q "${TEMPLATEPATTERN}" || exiterror "Invalid characters in sendback template; pattern is ${TEMPLATEPATTERN}"
        DATASET="$2"
-       echo "_${DATASET}" | grep -vq " " || exiterror "Space found in dataset name"
+       echo "_${DATASET}" | $GREP -vq " " || exiterror "Space found in dataset name"
        [ -z "${DATASET}" ] && exiterror "No dataset given."
        [ -z "$1" ] && exiterror "No template given."
 
@@ -83,7 +91,7 @@ if [ "$1" = "reinvoked" ]; then
        fi
 
        # Make a new snapshot.
-       NEWSNAP="${TEMPLATE}`date +%FT%T`__"
+       NEWSNAP="${TEMPLATE}`$DATE +%FT%T`__"
        NEWFULLSNAP="${DATASET}@${NEWSNAP}"
        logit "Making snapshot ${NEWFULLSNAP}"
        $ZFS snapshot "${NEWFULLSNAP}"
@@ -102,9 +110,9 @@ if [ "$1" = "reinvoked" ]; then
        # Next lines shared with sendback
        TEMPLATE="__simplesnap_$1_"
        TEMPLATEPATTERN="^[a-zA-Z0-9_]\+\$"
-       echo "_$TEMPLATE" | grep -q "${TEMPLATEPATTERN}" || exiterror "Invalid characters in reap template; pattern is ${TEMPLATEPATTERN}"
+       echo "_$TEMPLATE" | $GREP -q "${TEMPLATEPATTERN}" || exiterror "Invalid characters in reap template; pattern is ${TEMPLATEPATTERN}"
        DATASET="$2"
-       echo "_${DATASET}" | grep -vq " " || exiterror "Space found in dataset name"
+       echo "_${DATASET}" | $GREP -vq " " || exiterror "Space found in dataset name"
        [ -z "${DATASET}" ] && exiterror "No dataset given."
        [ -z "$1" ] && exiterror "No template given."
         
@@ -115,7 +123,7 @@ if [ "$1" = "reinvoked" ]; then
        else
          for REMOVAL in ${SNAPSTOREMOVE}; do
             logit "Destroying snapshot ${REMOVAL}"
-            echo "_${REMOVAL}" | grep -q '@' || exiterror "PANIC: snapshot name doesn't contain '@'"
+            echo "_${REMOVAL}" | $GREP -q '@' || exiterror "PANIC: snapshot name doesn't contain '@'"
             $ZFS destroy "${REMOVAL}"
          done
        fi
@@ -138,8 +146,8 @@ fi
 
 # Sanitize input.  We don't want special characters here.
 
-echo ".${CMD}" | grep -q "${PATTERN}" || exiterror "Invalid characters in input; pattern is: ${PATTERN}"
-echo ".${CMD}" | grep -vq '\.\.' || exiterror "Found .. in input; aborting."
+echo ".${CMD}" | $GREP -q "${PATTERN}" || exiterror "Invalid characters in input; pattern is: ${PATTERN}"
+echo ".${CMD}" | $GREP -vq '\.\.' || exiterror "Found .. in input; aborting."
 
 logit "Reinvoking to parse parameters"
 exec "$0" reinvoked ${CMD}

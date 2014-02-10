@@ -38,6 +38,21 @@ simplesnap:
    backup hosts, or onto multiple sets of backup media (when, for
    instance, backup media is cycled into offsite storage)
 
+PREREQUISITES
+
+Requires:
+
+ * GNU bash
+ * logger (from bsdutils on Linux; 
+   ftp://ftp.us.kernel.org/pub/linux/utils/util-linux-ng/ or 
+   git://git.debian.org/~lamont/util-linux.git )
+ * optional but recommended: dotlockfile from liblockfile.
+
+This has been tested on Debian Linux with ZFSOnLinux.  It will
+probably work on FreeBSD or Solaris as well, especially if the GNU
+tools are installed or available under "g" names.  The script will try
+to find them with those names and use them if possible.
+
 LICENSE
 
 Copyright (c) 2014 John Goerzen
