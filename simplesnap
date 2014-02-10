@@ -1,0 +1,170 @@
+#!/bin/bash
+
+# Simple snapshot manager
+
+# Copyright (c) 2014 John Goerzen
+#   This program is free software: you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation, either version 3 of the License, or
+#   (at your option) any later version.
+#
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+set -e
+
+logit () {
+   logger -p info -t "`basename $0`[$$]" "$1"
+}
+
+exiterror () {
+   logit "$1"
+   echo "$1" 1>&2
+   exit 10
+}
+
+syntaxerror () {
+   cat <<EOF
+Syntax: $0 [--sshcmd CMD] --store SORE --setname NAME --host HOST
+
+Required:
+
+  --store: gives the ZFS dataset name where data will be stored.  Mountpoint
+           is inferred.
+  --setname: Gives the backup set name.  Can just be a made-up word
+             if multiple sets aren't needed; for instance, the hostname
+             of the backup server.  This is used in the snapshot name.
+  --host: Gives the hostname to back up.
+
+Optional:
+
+  --sshcmd: Gives the SSH command.  Defaults to "ssh".  Example:
+            --sshcmd "-i ~/.id_rsa_simplesnap"
+  --remotecmd: Gives the path to simplesnapwrap on the remote.
+               Not usually relevant, since this is set in
+               ~/.ssh/authorized_keys.  Default: "simplesnapwrap"
+
+EOF
+  exiterror "Syntax error: $1"
+}
+
+while [ -n "$1" ]; do
+  case "$1" in
+    "--sshcommand")
+      SSHCMD="$2"
+      shift 2
+      ;;
+    "--remotecommand")
+      REMOTECMD="$2"
+      shift 2
+    "--store")
+      STORE="$2"
+      shift 2
+      ;;
+    "--setname")
+      SETNAME="$2"
+      shift 2
+      ;;
+    "--host")
+      HOST="$2"
+      shift 2
+      ;;
+    *)
+      syntaxerror "Unknown option \"$1\""
+      ;;
+  esac
+done
+
+SSHCMD="${SSHCMD:-ssh}"
+REMOTECMD="${REMOTECMD:-simplesnapwrap}"
+
+# Validating
+[ -n "$SSHCMD" ] | syntaxerror "Invalid SSH command: $SSHCMD"
+[ -n "$STORE" ] | syntaxerror "Missing --store"
+[ -n "$SETNAME" ] | syntaxerror "Missing --setname"
+[ -n "$HOST" ] | syntaxerror "Missing --host"
+
+PATTERN="^[a-zA-Z0-9_/. -]\+\$"
+
+echo "_${STORE}" | grep -qv " " || syntaxerror "Space in --store: ${STORE}"
+echo "_${SETNAME}" | grep -q "${PATTERN}" || syntaxerror "Invalid characters in setname \"${SETNAME}\"; pattern is \"${PATTERN}\""
+echo "_${SETNAME}" | grep -qv '^_-' || syntaxerror "Set name cannot begin with a dash: \"${SETNAME\""
+
+MOUNTPOINT="`zfs list -H -o mountpoint -t filesystem \"${STORE}\"`"
+
+logit "Store ${STORE} is mounted at ${MOUNTPOINT}"
+
+cd "${MOUNTPOINT}"
+
+LOCKFILE="${MOUNTPOINT}/.lock"
+
+if dotlockfile -l -p "${LOCKFILE}"; then
+  LOCKMETHOD="dotlockfile"
+  logit "Lock obtained at ${LOCKFILE} with dotlockfile"
+  trap "ECODE=$?; dotlockfile -u \"${LOCKFILE}\"" EXIT INT TERM
+else
+  RETVAL="$?"
+  if [ "$RETVAL" = "127" ]; then
+    LOCKMETHOD="mkdir"
+    mkdir "${LOCKFILE}" || exiterror "Could not obtain lock at ${LOCKFILE}; if $0 is not already running, rmdir that path."
+    logit "Lock obtained at ${LOCKFILE} with mkdir"
+    trap "ECODE=$?; rmdir \"${LOCKFILE}\"" EXIT INT TERM
+  else
+    exiterror "Could not obtain lock at ${LOCKFILE}; $0 likely already running."
+  fi
+fi
+
+# Obtain a list of filesystems.
+
+runwrap () {
+  logit "Running $SSHCMD $REMOTECMD $*"
+  $SSHCMD $REMOTECMD "$@"
+}
+
+runzfs () {
+  logit "Running /sbin/zfs $*"
+  /sbin/zfs "$@"
+}
+
+if [ ! -d "${MOUNTPOINT}/${HOST}" ]; then
+  runzfs create "${STORE}/${HOST}"
+fi
+
+# template - $1
+# dataset - $2
+listsnaps () {
+   $ZFS list -t snapshot -r -d 1 -H -o name "$2" | grep "@$1" || true
+}
+
+reap () {
+  TEMPLATE="__simplesnap_${SETNAME}_"
+  DATASET="$1"
+       # We always save the most recent.
+       SNAPSTOREMOVE="`listsnaps \"${TEMPLATE}\" \"${DATASET}\" | head -n -1`"
+       if [ -z "${SNAPSTOREMOVE}" ]; then
+         logit "No snapshots to remove."
+       else
+         for REMOVAL in ${SNAPSTOREMOVE}; do
+            logit "Destroying snapshot ${REMOVAL}"
+            echo "_${REMOVAL}" | grep -q '@' || exiterror "PANIC: snapshot name doesn't contain '@'"
+            runzfs destroy "${REMOVAL}"
+         done
+       fi
+}
+  
+
+logit "Finding remote datasets to back up"
+for DATASET in runwrap listfs; do
+  if runwrap sendback "${SETNAME}" "${DATASET}" | \
+     runzfs receive -f "${STORE}/${HOST}/${DATASET}"; then
+     logit "Received backup into ${STORE}/${HOST}/${DATASET}."
+     runwrap reap "${SETNAME}" "${DATASET}"
+     reap "${STORE}/${HOST}/${DATASET}"
+  fi
+done
+
