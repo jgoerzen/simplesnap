@@ -227,6 +227,9 @@ for DATASET in ${REMOTEDATASETS}; do
       logit "Received backup into ${STORE}/${HOST}/${DATASET}."
       runwrap reap "${SETNAME}" "${DATASET}"
       reap "${STORE}/${HOST}/${DATASET}"
-  fi
+  else
+      logit "zfs receive died with error: $?"
+      exit 100
+  fi        
 done
 
