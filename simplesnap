@@ -129,8 +129,8 @@ fi
 
 runwrap () {
   if [ "$LOCALMODE" = "on" ]; then
-    logit "Running on localhost: $WRAPCMD $*"
-    "${WRAPCMD}" "$@"
+    logit "Running on localhost: $WRAPCMD reinvoked $*"
+    "${WRAPCMD}" reinvoked "$@"
   else
     logit "Running $SSHCMD $WRAPCMD $*"
     ${SSHCMD} ${HOST} ${WRAPCMD} "$@"
