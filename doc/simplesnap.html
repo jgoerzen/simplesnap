@@ -1,0 +1,850 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN""http://www.w3.org/TR/html4/loose.dtd">
+<HTML
+><HEAD
+><TITLE
+>simplesnap</TITLE
+><META
+NAME="GENERATOR"
+CONTENT="Modular DocBook HTML Stylesheet Version 1.79"></HEAD
+><BODY
+CLASS="REFENTRY"
+BGCOLOR="#FFFFFF"
+TEXT="#000000"
+LINK="#0000FF"
+VLINK="#840084"
+ALINK="#0000FF"
+><H1
+><A
+NAME="AEN1"
+></A
+>simplesnap</H1
+><DIV
+CLASS="REFNAMEDIV"
+><A
+NAME="AEN14"
+></A
+><H2
+>Name</H2
+>simplesnap&nbsp;--&nbsp;Simple and powerful way to send ZFS snapshots across a
+    network</DIV
+><DIV
+CLASS="REFSYNOPSISDIV"
+><A
+NAME="AEN17"
+></A
+><H2
+>Synopsis</H2
+><P
+><B
+CLASS="COMMAND"
+>simplesnap</B
+>  [<CODE
+CLASS="OPTION"
+>--sshcmd</CODE
+>
+        <TT
+CLASS="REPLACEABLE"
+><I
+>COMMAND</I
+></TT
+>] [<CODE
+CLASS="OPTION"
+>--local</CODE
+>]  <CODE
+CLASS="OPTION"
+>--store</CODE
+> <TT
+CLASS="REPLACEABLE"
+><I
+>STORE</I
+></TT
+>   <CODE
+CLASS="OPTION"
+>--setname</CODE
+>
+        <TT
+CLASS="REPLACEABLE"
+><I
+>NAME</I
+></TT
+>   <CODE
+CLASS="OPTION"
+>--host</CODE
+>
+      <TT
+CLASS="REPLACEABLE"
+><I
+>HOST</I
+></TT
+> </P
+><P
+><B
+CLASS="COMMAND"
+>simplesnap</B
+>   <CODE
+CLASS="OPTION"
+>--check</CODE
+> <TT
+CLASS="REPLACEABLE"
+><I
+>TIMEFRAME</I
+></TT
+>   <CODE
+CLASS="OPTION"
+>--store</CODE
+> <TT
+CLASS="REPLACEABLE"
+><I
+>STORE</I
+></TT
+>   <CODE
+CLASS="OPTION"
+>--setname</CODE
+>
+        <TT
+CLASS="REPLACEABLE"
+><I
+>NAME</I
+></TT
+>  [<CODE
+CLASS="OPTION"
+>--host</CODE
+>
+      <TT
+CLASS="REPLACEABLE"
+><I
+>HOST</I
+></TT
+>]</P
+></DIV
+><DIV
+CLASS="REFSECT1"
+><A
+NAME="AEN48"
+></A
+><H2
+>Description</H2
+><P
+>      <SPAN
+CLASS="APPLICATION"
+>simplesnap</SPAN
+> is a simple way to send ZFS snapshots across a
+      network.  Although it can serve many purposes, its primary goal
+      is to manage backups from one ZFS filesystem to a backup
+      filesystem also running ZFS, using incremental backups to
+      minimize network traffic and disk usage.
+    </P
+><P
+>      <SPAN
+CLASS="APPLICATION"
+>simplesnap</SPAN
+> is <SPAN
+CLASS="emphasis"
+><I
+CLASS="EMPHASIS"
+>FLEXIBLE</I
+></SPAN
+>; it is designed to
+      perfectly compliment snapshotting tools, permitting rotating
+      backups with arbitrary retention periods.  It lets multiple
+      machines back up a single target, lets one machine back up
+      multiple targets, and keeps it all straight.
+    </P
+><P
+>      <SPAN
+CLASS="APPLICATION"
+>simplesnap</SPAN
+> is <SPAN
+CLASS="emphasis"
+><I
+CLASS="EMPHASIS"
+>EASY</I
+></SPAN
+>; there is no
+      configuration file needed.  One ZFS property is available to
+      exclude datasets/filesystems.  ZFS datasets are automatically
+      discovered on machines being backed up.
+    </P
+><P
+>      <SPAN
+CLASS="APPLICATION"
+>simplesnap</SPAN
+> is <SPAN
+CLASS="emphasis"
+><I
+CLASS="EMPHASIS"
+>SAFE</I
+></SPAN
+>; it is robust in the
+      face of interrupted transfers, and needs little help to keep
+      running.
+    </P
+><P
+>      <SPAN
+CLASS="APPLICATION"
+>simplesnap</SPAN
+> is <SPAN
+CLASS="emphasis"
+><I
+CLASS="EMPHASIS"
+>SECURE</I
+></SPAN
+>; unlike many similar
+      tools, it does not require full root access to the machines
+      being backed up.  It runs only a small wrapper as root, and the
+      wrapper has only three commands it implements.
+    </P
+><DIV
+CLASS="REFSECT2"
+><A
+NAME="AEN64"
+></A
+><H3
+>Feature List</H3
+><P
+>        Besides the above, <SPAN
+CLASS="APPLICATION"
+>simplesnap</SPAN
+>:
+      </P
+><P
+></P
+><UL
+><LI
+><P
+>            Does one thing and does it well.  It is designed to be used with
+            a snapshot auto-rotator on both ends (such as zfSnap).  simplesnap
+            will transfer snapshots made by other tools, but will not destroy
+            them on either end.
+          </P
+></LI
+><LI
+><P
+>            Requires ssh public key authorization to the host being backed up,
+            but does not require permission to run arbitrary commands.  It has
+            a wrapper to run on the backup host, written in bash, which accepts
+            only three operations and performs them simply.  It is suitable for
+            a locked-down authorized_keys file.
+          </P
+></LI
+><LI
+><P
+>            Creates minimal snapshots for its own internal purposes, generally
+            leaving no more than 1 or 2 per dataset, and reaps them
+            automatically without touching others.
+          </P
+></LI
+><LI
+><P
+>            Is a small program, easily audited.  In fact, most of the code is devoted to sanity-checking, security, and error
+            checking.
+          </P
+></LI
+><LI
+><P
+>            Automatically discovers what datasets to back up from the remote.
+            Uses a user-defined zfs property to exclude filesystems that should
+            not be backed up.
+          </P
+></LI
+><LI
+><P
+>            Logs copiously to syslog on all hosts involved in backups.
+          </P
+></LI
+><LI
+><P
+>            Intelligently supports a single machine being backed up by multiple
+            backup hosts, or onto multiple sets of backup media (when, for
+            instance, backup media is cycled into offsite storage)
+          </P
+></LI
+></UL
+></DIV
+><DIV
+CLASS="REFSECT2"
+><A
+NAME="AEN83"
+></A
+><H3
+>Method of Operation</H3
+><P
+>        <SPAN
+CLASS="APPLICATION"
+>simplesnap</SPAN
+>'s operation is very simple.
+      </P
+><P
+>        The <B
+CLASS="COMMAND"
+>simplesnap</B
+> program runs on the machine
+        that stores the backups -- we'll call it the backuphost.
+        There is a restricted remote command wrapper called
+        <B
+CLASS="COMMAND"
+>simplesnapwrap</B
+> that runs on the machine
+        being backed up -- we'll call it the activehost.
+        <B
+CLASS="COMMAND"
+>simplesnapwrap</B
+> is never invoked directly by
+        the end-user; it is always called remotely by
+        <B
+CLASS="COMMAND"
+>simplesnap</B
+>.
+      </P
+><P
+>        With <SPAN
+CLASS="APPLICATION"
+>simplesnap</SPAN
+>, the backuphost always connects to the
+        activehost -- never the other way round.
+      </P
+><P
+>        <B
+CLASS="COMMAND"
+>simplesnap</B
+> runs in the backuphost, and
+        first connects to the <B
+CLASS="COMMAND"
+>simplesnapwrap</B
+> on the
+        activehost and asks it for a
+        list of the ZFS datasets ("listfs" operation).  <B
+CLASS="COMMAND"
+>simplesnapwrap</B
+>
+        responds with a list of all ZFS datasets that were not flagged for
+        exclusion.
+      </P
+><P
+>        Next, <B
+CLASS="COMMAND"
+>simplesnap</B
+> connects back to <B
+CLASS="COMMAND"
+>simplesnapwrap</B
+> once for each dataset
+        to be backed up -- the "sendback" operation.  <B
+CLASS="COMMAND"
+>simplesnap</B
+> passes along
+        to it only two things: the setname and the dataset
+        (filesystem) name.
+      </P
+><P
+>        <B
+CLASS="COMMAND"
+>simplesnapwrap</B
+> looks to see if there is an existing simplesnap
+        snapshot corresponding to that <TT
+CLASS="REPLACEABLE"
+><I
+>SETNAME</I
+></TT
+>.  If not, it creates one and
+        sends it as a full, non-incremental backup.  That completes the job
+        for that dataset.
+      </P
+><P
+>        If there is an existing snapshot for that <TT
+CLASS="REPLACEABLE"
+><I
+>SETNAME</I
+></TT
+>, simplesnapwrap
+        creates a new one, constructing the snapshot name containing a
+        timestamp and the <TT
+CLASS="REPLACEABLE"
+><I
+>SETNAME</I
+></TT
+>, then sends an incremental, using the oldest
+        snapshot from that setname as the basis for zfs send -I.
+      </P
+><P
+>        After the backuphost has observed <B
+CLASS="COMMAND"
+>zfs receive</B
+> exiting without error,
+        it contacts <B
+CLASS="COMMAND"
+>simplesnapwrap</B
+> once more and requests the "reap"
+        operation.  This cleans up the old snapshots for the given <TT
+CLASS="REPLACEABLE"
+><I
+>SETNAME</I
+></TT
+>,
+        leaving only the most recent.  This is a separate operation in
+        <B
+CLASS="COMMAND"
+>simplesnapwrap</B
+> ensuring that even if the transmission is interrupted,
+        still it will be OK in the end because <B
+CLASS="COMMAND"
+>zfs receive -F</B
+> is used, and the
+        data will come across next time.
+      </P
+><P
+>        The idea is that some system like <B
+CLASS="COMMAND"
+>zfSnap</B
+> will be used on both ends to
+        make periodic snapshots and clean them up.  One can use careful prefix
+        names with zfSnap to use different prefixes on each serverhost, and
+        then implement custom cleanup rules with -F on the holderhost.
+      </P
+></DIV
+></DIV
+><DIV
+CLASS="REFSECT1"
+><A
+NAME="AEN116"
+></A
+><H2
+>Quick Start</H2
+><P
+>      This section will describe how a first-time <SPAN
+CLASS="APPLICATION"
+>simplesnap</SPAN
+> user
+      can get up and running quickly.  It assumes you already have
+      <SPAN
+CLASS="APPLICATION"
+>simplesnap</SPAN
+> installed and working on your system.  If not,
+      please follow the instructions in the
+      <TT
+CLASS="FILENAME"
+>INSTALL.txt</TT
+> file in the source
+      distribution.
+    </P
+><P
+>      As above, I will refer to the machine storing the backups as the
+      "backuphost" and the machine being backed up as the
+      "activehost".
+    </P
+><P
+>      First, on the backuphost, as root, generate an ssh keypair that
+      will be used exclusively for <SPAN
+CLASS="APPLICATION"
+>simplesnap</SPAN
+>.
+    </P
+><P
+>      <B
+CLASS="COMMAND"
+>ssh-keygen -t rsa -f ~/.ssh/id_rsa_simplesnap</B
+>
+    </P
+><P
+>      When prompted for a passphrase, leave it empty.
+    </P
+><P
+>      Now, on the activehost, edit or create a file called
+      <TT
+CLASS="FILENAME"
+>~/.ssh/authorized_keys</TT
+>.  Initialize it with the content of
+      <TT
+CLASS="FILENAME"
+>~/.ssh/id_rsa_simplesnap.pub</TT
+> from the backuphost.  (Or, add to the
+      end, if you already have lines in the file.)  Then, at the
+      beginning of that one very long line, add text like this:
+    </P
+><PRE
+CLASS="PROGRAMLISTING"
+>command="/usr/sbin/simplesnapwrap",from="1.2.3.4",
+no-port-forwarding,no-X11-forwarding,no-pty </PRE
+><P
+>      (I broke that line into two for readability, but this must all
+      be on a single line in your file.)
+    </P
+><P
+>      The <TT
+CLASS="REPLACEABLE"
+><I
+>1.2.3.4</I
+></TT
+> is the IP address that
+      connections from the backuphost
+      will appear to come from.  It may be omitted if the IP is not static,
+      but it affords a little extra security.  The line will wind up looking
+      like:
+    </P
+><PRE
+CLASS="PROGRAMLISTING"
+>command="/usr/sbin/simplesnapwrap",from="1.2.3.4",
+no-port-forwarding,no-X11-forwarding,no-pty ssh-rsa AAAA....</PRE
+><P
+>      (Again, this should all be on one huge line.)
+    </P
+><P
+>      If there are any ZFS datasets you do not want to be backed up, set
+      <CODE
+CLASS="PARAMETER"
+>org.complete.simplesnap:exclude</CODE
+> property
+      on the activehost
+      to <CODE
+CLASS="PARAMETER"
+>on</CODE
+>.  For instance:
+    </P
+><P
+>      <B
+CLASS="COMMAND"
+>zfs set org.complete.simplesnap:exclude=on
+      tank/junkdata</B
+>
+    </P
+><P
+>      Now, back on the backuphost, you should be able to run:
+    </P
+><P
+>      <B
+CLASS="COMMAND"
+>ssh -i ~/.ssh/id_rsa_simplesnap serverhost</B
+>
+    </P
+><P
+>      say yes when asked if you want to add the key to the known_hosts
+      file.  At this point, you should see output containing:
+    </P
+><P
+>      "simplesnapwrap: This program is to be run from ssh."
+    </P
+><P
+>      If you see that, then simplesnapwrap was properly invoked
+      remotely.
+    </P
+><P
+>      Now, create a ZFS filesystem to hold your backups.  For
+      instance:
+    </P
+><P
+>      <B
+CLASS="COMMAND"
+>zfs create tank/simplesnap</B
+>
+    </P
+><P
+>      Now, you can run the backup:
+    </P
+><P
+>      <B
+CLASS="COMMAND"
+>simplesnap --host serverhost --setname mainset
+        --store tank/simplesnap
+        --sshcmd "ssh -i /root/.ssh/id_rsa_simplesnap"
+      </B
+>
+    </P
+><P
+>      You can monitor progress in <TT
+CLASS="FILENAME"
+>/var/log/syslog</TT
+>.  If all goes well, you
+      will see filesystems start to be populated under
+      <TT
+CLASS="FILENAME"
+>tank/simplesnap/host</TT
+>.
+    </P
+><P
+>      Simple!
+    </P
+></DIV
+><DIV
+CLASS="REFSECT1"
+><A
+NAME="AEN158"
+></A
+><H2
+>Advanced: SETNAME usage</H2
+><P
+>      Most people will always use the same <TT
+CLASS="REPLACEABLE"
+><I
+>SETNAME</I
+></TT
+>.  The <TT
+CLASS="REPLACEABLE"
+><I
+>SETNAME</I
+></TT
+> is used to
+      track and name the snapshots on the remote end.  simplesnap tries to always
+      leave one snapshot on the remote, to serve as the base for a future
+      incremental.
+    </P
+><P
+>      In some situations, you may have multiple bases for incrementals.  The
+      two primary examples are two different backup servers backing up the
+      same machine, or having two sets of backup media and rotating them to
+      offsite storage.  In these situations, you will have to keep different
+      snapshots on the activehost for the different backups, since they will
+      be current to different points in time.
+    </P
+></DIV
+><DIV
+CLASS="REFSECT1"
+><A
+NAME="AEN164"
+></A
+><H2
+>Options</H2
+><P
+>      All <SPAN
+CLASS="APPLICATION"
+>simplesnap</SPAN
+> options begin with two dashes (`--').  Most take
+      a parameter, which is to be separated from the option by a
+      space.  The equals sign is not a valid separator for
+      <SPAN
+CLASS="APPLICATION"
+>simplesnap</SPAN
+>.
+    </P
+><P
+>      The normal <SPAN
+CLASS="APPLICATION"
+>simplesnap</SPAN
+> mode is backing up.  An alternative
+      check mode is available, which requires fewer parameters.  This
+      mode is described below.
+    </P
+><P
+></P
+><DIV
+CLASS="VARIABLELIST"
+><DL
+><DT
+><CODE
+CLASS="OPTION"
+>--check <TT
+CLASS="REPLACEABLE"
+><I
+>TIMEFRAME</I
+></TT
+></CODE
+></DT
+><DD
+><P
+>            Do not back up, but check existing backups.  If any
+            datasets' newest backup is older than
+          <TT
+CLASS="REPLACEABLE"
+><I
+>TIMEFRAME</I
+></TT
+>, print an error and
+            exit with a nonzero code.  Scans all hosts unless a
+            specific host is given with <CODE
+CLASS="OPTION"
+>--host</CODE
+>.  The
+            parameter is in the format given to GNU <SPAN
+CLASS="APPLICATION"
+>date</SPAN
+>(1); for
+            instance,
+            --check "30 days ago".  Remember to enclose it in quotes
+            if it contains spaces.
+          </P
+></DD
+><DT
+><CODE
+CLASS="OPTION"
+>--host</CODE
+>
+        <TT
+CLASS="REPLACEABLE"
+><I
+>HOST</I
+></TT
+></DT
+><DD
+><P
+>            Gives the name of the host to back up.  This is both
+            passed to ssh and used to name the backup sets.
+          </P
+><P
+>            In a few situations, one may not wish to use the same name
+            for both.  It is recommend to use the Host and HostName
+            options in <TT
+CLASS="FILENAME"
+>~/.ssh/config</TT
+> to configure aliases in this
+            situation.
+          </P
+></DD
+><DT
+><CODE
+CLASS="OPTION"
+>--local</CODE
+></DT
+><DD
+><P
+>            Specifies that the host being backed up is local to the
+            machine.  Do not use ssh to contact it, and invoke the
+            wrapper directly.
+          </P
+></DD
+><DT
+><CODE
+CLASS="OPTION"
+>--sshcmd
+            <TT
+CLASS="REPLACEABLE"
+><I
+>COMMAND</I
+></TT
+></CODE
+></DT
+><DD
+><P
+>            Gives the command to use to connect to the remote host.
+            Defaults to "ssh".  It may be used to select an
+            alternative configuration file or keypair.  Remember to
+            quote it per your shell if it contains spaces.  For example: 
+            --sshcmd "ssh -i /root/.id_rsa_simplesnap".  This command
+            is ignored when <CODE
+CLASS="OPTION"
+>--local</CODE
+> or
+            <CODE
+CLASS="OPTION"
+>--check</CODE
+> is given.
+          </P
+></DD
+><DT
+><CODE
+CLASS="OPTION"
+>--setname <TT
+CLASS="REPLACEABLE"
+><I
+>SETNAME</I
+></TT
+></CODE
+></DT
+><DD
+><P
+>            Gives the backup set name.  Can just be a made-up word if
+            multiple sets are not needed; for instance, the hostname of
+            the backup server.  This is used as part of the snapshot
+            name.
+          </P
+></DD
+><DT
+><CODE
+CLASS="OPTION"
+>--store
+        <TT
+CLASS="REPLACEABLE"
+><I
+>STORE</I
+></TT
+></CODE
+></DT
+><DD
+><P
+>Gives the ZFS dataset name where the data
+            will be stored.  Should not begin with a slash.  The
+            mountpoint will be obtained from the ZFS subsystem.
+            Always required.
+          </P
+></DD
+><DT
+><CODE
+CLASS="OPTION"
+>--wrapcmd
+            <TT
+CLASS="REPLACEABLE"
+><I
+>COMMAND</I
+></TT
+></CODE
+></DT
+><DD
+><P
+>            Gives the path to simplesnapwrap (which must be on the
+            remote machine unless <CODE
+CLASS="OPTION"
+>--local</CODE
+> is given).
+            Not usually relevant, since the
+            <CODE
+CLASS="PARAMETER"
+>command</CODE
+> parameter in
+            <TT
+CLASS="FILENAME"
+>~root/.ssh/authorized_keys</TT
+> gives the
+            path.  Default: "simplesnapwrap"
+          </P
+></DD
+></DL
+></DIV
+></DIV
+><DIV
+CLASS="REFSECT1"
+><A
+NAME="AEN223"
+></A
+><H2
+>SEE ALSO</H2
+><P
+>zfSnap (1), zfs (8).</P
+><P
+>      The zfSnap package compliments <SPAN
+CLASS="APPLICATION"
+>simplesnap</SPAN
+> perfectly.  Find it
+      at
+      <A
+HREF="https://github.com/graudeejs/zfSnap"
+TARGET="_top"
+>https://github.com/graudeejs/zfSnap</A
+>.
+    </P
+></DIV
+><DIV
+CLASS="REFSECT1"
+><A
+NAME="AEN229"
+></A
+><H2
+>AUTHOR</H2
+><P
+>This software and manual page was written by John Goerzen <CODE
+CLASS="EMAIL"
+>&#60;<A
+HREF="mailto:jgoerzen@complete.org"
+>jgoerzen@complete.org</A
+>&#62;</CODE
+>.
+      Permission is
+      granted to copy, distribute and/or modify this document under
+      the terms of the <ACRONYM
+CLASS="ACRONYM"
+>GNU</ACRONYM
+> General Public License, Version 3 any
+      later version published by the Free Software Foundation.  The
+      complete text of the GNU General Public License is included in
+      the file COPYING in the source distribution.
+    </P
+></DIV
+></BODY
+></HTML
+>
