@@ -196,6 +196,10 @@ manpage.1: manpage.sgml
         <command>simplesnap</command>.
       </para>
       <para>
+        With &simplesnap;, the backuphost always connects to the
+        activehost -- never the other way round.
+      </para>
+      <para>
         <command>simplesnap</command> runs in the backuphost, and
         first connects to the <command>simplesnapwrap</command> on the
         activehost and asks it for a
@@ -242,9 +246,119 @@ manpage.1: manpage.sgml
         then implement custom cleanup rules with -F on the holderhost.
       </para>
     </refsect2>
-
-    
   </refsect1>
+
+  <refsect1>
+    <title>Quick Start</title>
+
+    <para>
+      This section will describe how a first-time &simplesnap; user
+      can get up and running quickly.  It assumes you already have
+      &simplesnap; installed and working on your system.  If not,
+      please follow the instructions in the
+      <filename>INSTALL.txt</filename> file in the source
+      distribution.
+    </para>
+
+    <para>
+      As above, I will refer to the machine storing the backups as the
+      "backuphost" and the machine being backed up as the
+      "activehost".
+    </para>
+    <para>
+      First, on the backuphost, as root, generate an ssh keypair that
+      will be used exclusively for &simplesnap;.
+    </para>
+
+    <para>
+      <command>ssh-keygen -t rsa -f ~/.ssh/id_rsa_simplesnap</command>
+    </para>
+
+    <para>
+      When prompted for a passphrase, leave it empty.
+    </para>
+
+    <para>
+      Now, on the activehost, edit or create a file called
+      <filename>~/.ssh/authorized_keys</filename>.  Initialize it with the content of
+      <filename>~/.ssh/id_rsa_simplesnap.pub</filename> from the backuphost.  (Or, add to the
+      end, if you already have lines in the file.)  Then, at the
+      beginning of that one very long line, add text like this:
+    </para>
+
+    <programlisting><![CDATA[
+command="/usr/sbin/simplesnapwrap",from="1.2.3.4",
+no-port-forwarding,no-X11-forwarding,no-pty 
+]]></programlisting>
+
+    <para>
+      (I broke that line into two for readability, but this must all
+      be on a single line in your file.)
+    </para>
+
+    <para>
+      The <replaceable>1.2.3.4</replaceable> is the IP address that
+      connections from the backuphost
+      will appear to come from.  It may be omitted if the IP is not static,
+      but it affords a little extra security.  The line will wind up looking
+      like:
+    </para>
+
+    <programlisting<![CDATA[
+command="/usr/sbin/simplesnapwrap",from="1.2.3.4",
+no-port-forwarding,no-X11-forwarding,no-pty ssh-rsa AAAA....
+]]></programlisting>
+
+    <para>
+      (Again, this should all be on one huge line.)
+    </para>
+    <para>
+      If there are any ZFS datasets you do not want to be backed up, set
+      <parameter>org.complete.simplesnap:exclude</parameter> property
+      on the activehost
+      to <parameter>on</parameter>.  For instance:
+    </para>
+    <para>
+      <command>zfs set org.complete.simplesnap:exclude=on
+      tank/junkdata</command>
+    </para>
+    <para>
+      Now, back on the backuphost, you should be able to run:
+    </para>
+    <para>
+      <command>ssh -i ~/.ssh/id_rsa_simplesnap serverhost</command>
+    </para>
+    <para>
+      say yes when asked if you want to add the key to the known_hosts
+      file.  At this point, you should see output containing:
+    </para>
+    <para>
+      "simplesnapwrap: This program is to be run from ssh."
+    </para>
+
+If you see that, then simplesnapwrap was properly invoked remotely.
+
+Now, create a ZFS filesystem to hold your backups.  For instance:
+
+zfs create tank/simplesnap
+
+Now, you can run the backup:
+
+simplesnap --host serverhost --setname mainset \
+  --store tank/simplesnap \
+  --sshcmd "ssh -i /root/.ssh/id_rsa_simplesnap"
+
+
+You can monitor progress in /var/log/syslog.  If all goes well, you
+will see filesystems start to be populated under tank/simplesnap/host.
+
+Note: you cannot use "=" in these commands.
+
+Simple!
+    </para>
+
+  </refsect1>
+
   <refsect1>
     <title>OPTIONS</title>
 
