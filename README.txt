@@ -114,38 +114,6 @@ be current to different points in time.
 
 HOW IT WORKS
 
-The operation is very simple.
-
-simplesnap first connects to the simplesnapwrap and asks it for a
-list of the ZFS datasets ("listfs" operation).  simplesnapwrap
-responds with a list of all ZFS datasets that were not flagged for
-exclusion.
-
-Next, simplesnap connects back to simplesnapwrap once for each dataset
-to be backed up -- the "sendback" operation.  simplesnap passes along
-to it only two things: the setname and the dataset (filesystem) name.
-
-simplesnapwrap looks to see if there is an existing simplesnap
-snapshot corresponding to that setname.  If not, it creates one and
-sends it as a full, non-incremental backup.  That completes the job
-for that dataset.
-
-If there is an existing snapshot for that setname, simplesnapwrap
-creates a new one, then sends an incremental, using the oldest
-snapshot from that setname as the basis for zfs send -I.
-
-After the holderhost has observed zfs receive exiting without error,
-it contacts simplesnapwrap once more and requests the "reap"
-operation.  This cleans up the old snapshots for the given setname,
-leaving only the most recent.  This is a separate operation in
-simplesnapwrap ensuring that even if the transmission is interrupted,
-still it will be OK in the end because zfs receive -F is used, and the
-data will come across next time.
-
-The idea is that some system like zfSnap will be used on both ends to
-make periodic snapshots and clean them up.  One can use careful prefix
-names with zfSnap to use different prefixes on each serverhost, and
-then implement custom cleanup rules with -F on the holderhost.
 
 LICENSE
 
