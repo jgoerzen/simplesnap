@@ -501,40 +501,25 @@ no-port-forwarding,no-X11-forwarding,no-pty ssh-rsa AAAA....
   <refsect1>
     <title>SEE ALSO</title>
 
-    <para>bar (1), baz (1).</para>
+    <para>zfSnap (1), zfs (8).</para>
 
-    <para>The programs are documented fully by <citetitle>The Rise and
-      Fall of a Fooish Bar</citetitle> available via the
-      <application>Info</application> system.</para>
+    <para>
+      The zfSnap package compliments &simplesnap; perfectly.  Find it
+      at
+      <ulink url="https://github.com/graudeejs/zfSnap"></ulink>.
+    </para>
   </refsect1>
   <refsect1>
     <title>AUTHOR</title>
 
-    <para>This manual page was written by &dhusername; &dhemail; for
-      the &debian; system (and may be used by others).  Permission is
+    <para>This software and manual page was written by &dhusername; &dhemail;.
+      Permission is
       granted to copy, distribute and/or modify this document under
-      the terms of the &gnu; General Public License, Version 2 any
-      later version published by the Free Software Foundation.
+      the terms of the &gnu; General Public License, Version 3 any
+      later version published by the Free Software Foundation.  The
+      complete text of the GNU General Public License is included in
+      the file COPYING in the source distribution.
     </para>
-    <para>
-      On Debian systems, the complete text of the GNU General Public
-      License can be found in /usr/share/common-licenses/GPL.
-    </para>
-
-    <refsect2>
-      <title>Foo</title>
-
-      <para>This manual page documents briefly the
-        <command>&dhpackage;</command> and <command>bar</command>
-        commands.</para>
-
-      <para>This manual page was written for the &debian; distribution
-        because the original program does not have a manual page.
-        Instead, it has documentation in the &gnu;
-        <application>Info</application> format; see below.</para>
-      
-      <para><command>&dhpackage;</command> is a program that...</para>
-    </refsect2>
   </refsect1>
 </refentry>
 
