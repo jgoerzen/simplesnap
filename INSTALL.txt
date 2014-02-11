@@ -1,0 +1,30 @@
+PREREQUISITES
+
+Requires:
+
+ * GNU bash
+ * logger (from bsdutils on Linux; 
+   ftp://ftp.us.kernel.org/pub/linux/utils/util-linux-ng/ or 
+   git://git.debian.org/~lamont/util-linux.git )
+
+Highly recommended:
+
+ * An automatic snapshotting and rotation system.  I use zfSnap from
+   https://github.com/graudeejs/zfSnap
+
+ * optional but recommended: dotlockfile from liblockfile.
+
+This has been tested on Debian Linux with ZFSOnLinux.  It will
+probably work on FreeBSD or Solaris as well, especially if the GNU
+tools are installed or available under "g" names.  The script will try
+to find them with those names and use them if possible.
+
+INSTALLATION
+
+Copy simplesnap somewhere on the host that will store backups and mark
+it executable.
+
+Copy simplesnapwrap somewhere on the hosts that will be backed up and
+mark it executable.
+
+If the host storing backups will also be backed up, it needs both.
