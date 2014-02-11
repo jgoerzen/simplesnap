@@ -199,7 +199,7 @@ fi
 
 LOCKFILE="${MOUNTPOINT}/${HOST}/.lock"
 
-if dotlockfile -l -p "${LOCKFILE}"; then
+if dotlockfile -r 0 -l -p "${LOCKFILE}"; then
   LOCKMETHOD="dotlockfile"
   logit "Lock obtained at ${LOCKFILE} with dotlockfile"
   trap "ECODE=$?; dotlockfile -u \"${LOCKFILE}\"; exit $?" EXIT INT TERM
