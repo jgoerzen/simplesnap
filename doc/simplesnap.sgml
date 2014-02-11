@@ -1,0 +1,270 @@
+<!doctype refentry PUBLIC "-//OASIS//DTD DocBook V4.1//EN" [
+
+<!-- Process this file with docbook-to-man to generate an nroff manual
+     page: `docbook-to-man manpage.sgml > manpage.1'.  You may view
+     the manual page with: `docbook-to-man manpage.sgml | nroff -man |
+     less'.  A typical entry in a Makefile or Makefile.am is:
+
+manpage.1: manpage.sgml
+	docbook-to-man $< > $@
+
+
+	The docbook-to-man binary is found in the docbook-to-man package.
+	Please remember that if you create the nroff version in one of the
+	debian/rules file targets (such as build), you will need to include
+	docbook-to-man in your Build-Depends control field.
+
+  -->
+
+  <!-- Fill in your name for FIRSTNAME and SURNAME. -->
+  <!ENTITY dhfirstname "<firstname>JOHN</firstname>">
+  <!ENTITY dhsurname   "<surname>GOERZEN</surname>">
+  <!-- Please adjust the date whenever revising the manpage. -->
+  <!-- SECTION should be 1-8, maybe w/ subsection other parameters are
+       allowed: see man(7), man(1). -->
+  <!ENTITY dhsection   "<manvolnum>8</manvolnum>">
+  <!ENTITY dhemail     "<email>jgoerzen@complete.org</email>">
+  <!ENTITY dhusername  "John Goerzen">
+  <!ENTITY dhucpackage "<refentrytitle>simplesnap</refentrytitle>">
+  <!ENTITY dhpackage   "simplesnap">
+  <!ENTITY simplesnap  "<application>simplesnap</application>">
+
+  <!ENTITY debian      "<productname>Debian</productname>">
+  <!ENTITY gnu         "<acronym>GNU</acronym>">
+  <!ENTITY gpl         "&gnu; <acronym>GPL</acronym>">
+]>
+
+<refentry>
+  <refentryinfo>
+    <address>
+      &dhemail;
+    </address>
+    <author>
+      &dhfirstname;
+      &dhsurname;
+    </author>
+    <copyright>
+      <year>2014</year>
+      <holder>&dhusername;</holder>
+    </copyright>
+  </refentryinfo>
+  <refmeta>
+    &dhucpackage;
+
+    &dhsection;
+  </refmeta>
+  <refnamediv>
+    <refname>&dhpackage;</refname>
+
+    <refpurpose>Simple and powerful way to send ZFS snapshots across a
+    network</refpurpose>
+  </refnamediv>
+  <refsynopsisdiv>
+    <cmdsynopsis>
+      <command>&dhpackage;</command>
+      <arg choice="opt"><option>--sshcmd</option>
+        <replaceable>COMMAND</replaceable></arg>
+      <arg choice="opt"><option>--local</option></arg>
+      <arg choice="plain"><option>--store</option> <replaceable>STORE</replaceable></arg>
+      <arg choice="plain"><option>--setname</option>
+        <replaceable>NAME</replaceable></arg>
+      <arg choice="plain"><option>--host</option>
+      <replaceable>HOST</replaceable></arg>
+    </cmdsynopsis>
+    <cmdsynopsis>
+      <command>&dhpackage;</command>
+      <arg choice="plain"><option>--check</option> <replaceable>TIMEFRAME</replaceable></arg>
+      <arg choice="plain"><option>--store</option> <replaceable>STORE</replaceable></arg>
+      <arg choice="plain"><option>--setname</option>
+        <replaceable>NAME</replaceable></arg>
+      <arg choice="opt"><option>--host</option>
+      <replaceable>HOST</replaceable></arg>
+    </cmdsynopsis>
+      
+  </refsynopsisdiv>
+  <refsect1>
+    <title>Description</title>
+
+
+    <para>
+      &simplesnap; is a simple way to send ZFS snapshots across a
+      network.  Although it can serve many purposes, its primary goal
+      is to manage backups from one ZFS filesystem to a backup
+      filesystem also running ZFS, using incremental backups to
+      minimize network traffic and disk usage.
+    </para>
+
+    <para>
+      &simplesnap; is <emphasis>FLEXIBLE</emphasis>; it is designed to
+      perfectly compliment snapshotting tools, permitting rotating
+      backups with arbitrary retention periods.  It lets multiple
+      machines back up a single target, lets one machine back up
+      multiple targets, and keeps it all straight.
+    </para>
+
+    <para>
+      &simplesnap; is <emphasis>EASY</emphasis>; there is no
+      configuration file needed.  One ZFS property is available to
+      exclude datasets/filesystems.  ZFS datasets are automatically
+      discovered on machines being backed up.
+    </para>
+
+    <para>
+      &simplesnap; is <emphasis>SAFE</emphasis>; it is robust in the
+      face of interrupted transfers, and needs little help to keep
+      running.
+    </para>
+
+    <para>
+      &simplesnap; is <emphasis>SECURE</emphasis>; unlike many similar
+      tools, it does not require full root access to the machines
+      being backed up.  It runs only a small wrapper as root, and the
+      wrapper has only three commands it implements.
+    </para>
+
+    <refsect2>
+      <title>Feature List</title>
+      <para>
+        Besides the above, &simplesnap;:
+      </para>
+
+      <itemizedlist>
+        <listitem><para>
+            Does one thing and does it well.  It is designed to be used with
+            a snapshot auto-rotator on both ends (such as zfSnap).  simplesnap
+            will transfer snapshots made by other tools, but will not destroy
+            them on either end.
+          </para>
+        </listitem>
+
+        <listitem><para>
+            Requires ssh public key authorization to the host being backed up,
+            but does not require permission to run arbitrary commands.  It has
+            a wrapper to run on the backup host, written in bash, which accepts
+            only three operations and performs them simply.  It is suitable for
+            a locked-down authorized_keys file.
+          </para>
+        </listitem>
+
+        <listitem><para>
+            Creates minimal snapshots for its own internal purposes, generally
+            leaving no more than 1 or 2 per dataset, and reaps them
+            automatically without touching others.
+          </para>
+        </listitem>
+
+        <listitem><para>
+            Is a small program, easily audited.  In fact, most of the code is devoted to sanity-checking, security, and error
+            checking.
+          </para>
+        </listitem>
+
+        <listitem><para>
+            Automatically discovers what datasets to back up from the remote.
+            Uses a user-defined zfs property to exclude filesystems that should
+            not be backed up.
+          </para>
+        </listitem>
+
+        <listitem><para>
+            Logs copiously to syslog on all hosts involved in backups.
+          </para>
+        </listitem>
+
+        <listitem><para>
+            Intelligently supports a single machine being backed up by multiple
+            backup hosts, or onto multiple sets of backup media (when, for
+            instance, backup media is cycled into offsite storage)
+          </para>
+        </listitem>
+      </itemizedlist>
+    </refsect2>
+
+    <refsect2>
+      <title>Method of Operation</title>
+    
+    <refsect2>
+      <title>Foo</title>
+
+      <para>This manual page documents briefly the
+        <command>&dhpackage;</command> and <command>bar</command>
+        commands.</para>
+
+      <para>This manual page was written for the &debian; distribution
+        because the original program does not have a manual page.
+        Instead, it has documentation in the &gnu;
+        <application>Info</application> format; see below.</para>
+      
+      <para><command>&dhpackage;</command> is a program that...</para>
+    </refsect2>
+  </refsect1>
+  <refsect1>
+    <title>OPTIONS</title>
+
+    <para>These programs follow the usual &gnu; command line syntax,
+      with long options starting with two dashes (`-').  A summary of
+      options is included below.  For a complete description, see the
+      <application>Info</application> files.</para>
+
+    <variablelist>
+      <varlistentry>
+        <term><option>-h</option>
+          <option>--help</option>
+        </term>
+        <listitem>
+          <para>Show summary of options.</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><option>-v</option>
+          <option>--version</option>
+        </term>
+        <listitem>
+          <para>Show version of program.</para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+  </refsect1>
+  <refsect1>
+    <title>SEE ALSO</title>
+
+    <para>bar (1), baz (1).</para>
+
+    <para>The programs are documented fully by <citetitle>The Rise and
+      Fall of a Fooish Bar</citetitle> available via the
+      <application>Info</application> system.</para>
+  </refsect1>
+  <refsect1>
+    <title>AUTHOR</title>
+
+    <para>This manual page was written by &dhusername; &dhemail; for
+      the &debian; system (and may be used by others).  Permission is
+      granted to copy, distribute and/or modify this document under
+      the terms of the &gnu; General Public License, Version 2 any
+      later version published by the Free Software Foundation.
+    </para>
+    <para>
+      On Debian systems, the complete text of the GNU General Public
+      License can be found in /usr/share/common-licenses/GPL.
+    </para>
+
+  </refsect1>
+</refentry>
+
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: sgml
+sgml-omittag:t
+sgml-shorttag:t
+sgml-minimize-attributes:nil
+sgml-always-quote-attributes:t
+sgml-indent-step:2
+sgml-indent-data:t
+sgml-parent-document:nil
+sgml-default-dtd-file:nil
+sgml-exposed-tags:nil
+sgml-local-catalogs:nil
+sgml-local-ecat-files:nil
+sgml-set-face :
+End:
+-->

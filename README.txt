@@ -2,41 +2,9 @@ simplesnap
 
 DESCRIPTION
 
-simplesnap is a simple way to send ZFS snapshots across a network.
-Although it can serve many purposes, its primary goal is to manage
-backups from one ZFS filesystem to a backup filesystem also running
-ZFS, using incremental backups to minimize network traffic and disk
-usage.
 
 simplesnap:
 
- * Does one thing and does it well.  It is designed to be used with
-   a snapshot auto-rotator on both ends (such as zfSnap).  simplesnap
-   will transfer snapshots made by other tools, but will not destroy
-   them on either end.
-
- * Requires ssh public key authorization to the host being backed up,
-   but does not require permission to run arbitrary commands.  It has
-   a wrapper to run on the backup host, written in bash, which accepts
-   only three operations and performs them simply.  It is suitable for
-   a locked-down authorized_keys file.
-
- * Creates minimal snapshots for its own internal purposes, generally
-   leaving no more than 1 or 2 per dataset, and reaps them
-   automatically without touching others.
-
- * Most of the code is devoted to sanity-checking, security, and error
-   checking.
-
- * Automatically discovers what datasets to back up from the remote.
-   Uses a user-defined zfs property to exclude filesystems that should
-   not be backed up.
-
- * Logs copiously to syslog on all hosts involved in backups.
-
- * Intelligently supports a single machine being backed up by multiple
-   backup hosts, or onto multiple sets of backup media (when, for
-   instance, backup media is cycled into offsite storage)
 
 PREREQUISITES
 
