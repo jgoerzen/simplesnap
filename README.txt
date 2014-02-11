@@ -1,18 +1,5 @@
 simplesnap
 
-ADVANCED
-
-Most people will always use the same setname.  The setname is used to
-track the snapshots on the remote end.  simplesnap tries to always
-leave one snapshot on the remote, to serve as the base for a future
-incremental.
-
-In some situations, you may have multiple bases for incrementals.  The
-two primary examples are two different backup servers backing up the
-same machine, or having two sets of backup media and rotating them to
-offsite storage.  In these situations, you will have to keep different
-snapshots on the serverhost for the different backups, since they will
-be current to different points in time.
 
 HOW IT WORKS
 

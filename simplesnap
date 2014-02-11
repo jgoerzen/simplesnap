@@ -32,7 +32,8 @@ syntaxerror () {
    cat <<EOF
 Syntax: 
 
-$0 [--sshcmd CMD] [--local] --store STORE --setname NAME --host HOST
+$0 [--sshcmd CMD] [--local] [--wrapcmd CMD] --store STORE 
+   --setname NAME --host HOST
 
 or
 

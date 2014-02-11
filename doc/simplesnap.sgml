@@ -335,57 +335,169 @@ no-port-forwarding,no-X11-forwarding,no-pty ssh-rsa AAAA....
     <para>
       "simplesnapwrap: This program is to be run from ssh."
     </para>
+    <para>
+      If you see that, then simplesnapwrap was properly invoked
+      remotely.
+    </para>
+    <para>
+      Now, create a ZFS filesystem to hold your backups.  For
+      instance:
+    </para>
+    <para>
+      <command>zfs create tank/simplesnap</command>
+    </para>
 
-If you see that, then simplesnapwrap was properly invoked remotely.
+    <para>
+      Now, you can run the backup:
+    </para>
 
-Now, create a ZFS filesystem to hold your backups.  For instance:
-
-zfs create tank/simplesnap
-
-Now, you can run the backup:
-
-simplesnap --host serverhost --setname mainset \
-  --store tank/simplesnap \
-  --sshcmd "ssh -i /root/.ssh/id_rsa_simplesnap"
-
-
-You can monitor progress in /var/log/syslog.  If all goes well, you
-will see filesystems start to be populated under tank/simplesnap/host.
-
-Note: you cannot use "=" in these commands.
-
-Simple!
+    <para>
+      <command>simplesnap --host serverhost --setname mainset
+        --store tank/simplesnap
+        --sshcmd "ssh -i /root/.ssh/id_rsa_simplesnap"
+      </command>
+    </para>
+    <para>
+      You can monitor progress in <filename>/var/log/syslog</filename>.  If all goes well, you
+      will see filesystems start to be populated under
+      <filename>tank/simplesnap/host</filename>.
+    </para>
+    <para>
+      Simple!
     </para>
 
   </refsect1>
 
   <refsect1>
-    <title>OPTIONS</title>
+    <title>Advanced: SETNAME usage</title>
+    <para>
+      Most people will always use the same <replaceable>SETNAME</replaceable>.  The <replaceable>SETNAME</replaceable> is used to
+      track and name the snapshots on the remote end.  simplesnap tries to always
+      leave one snapshot on the remote, to serve as the base for a future
+      incremental.
+    </para>
 
-    <para>These programs follow the usual &gnu; command line syntax,
-      with long options starting with two dashes (`-').  A summary of
-      options is included below.  For a complete description, see the
-      <application>Info</application> files.</para>
+    <para>
+      In some situations, you may have multiple bases for incrementals.  The
+      two primary examples are two different backup servers backing up the
+      same machine, or having two sets of backup media and rotating them to
+      offsite storage.  In these situations, you will have to keep different
+      snapshots on the activehost for the different backups, since they will
+      be current to different points in time.
+    </para>
+  </refsect1>
+
+
+  <refsect1>
+    <title>Options</title>
+
+    <para>
+      All &simplesnap; options begin with two dashes (`--').  Most take
+      a parameter, which is to be separated from the option by a
+      space.  The equals sign is not a valid separator for
+      &simplesnap;.
+    </para>
+
+    <para>
+      The normal &simplesnap; mode is backing up.  An alternative
+      check mode is available, which requires fewer parameters.  This
+      mode is described below.
+    </para>
 
     <variablelist>
       <varlistentry>
-        <term><option>-h</option>
-          <option>--help</option>
-        </term>
-        <listitem>
-          <para>Show summary of options.</para>
+        <term><option>--check <replaceable>TIMEFRAME</replaceable></option>
+          <listitem><para>
+            Do not back up, but check existing backups.  If any
+            datasets' newest backup is older than
+          <replaceable>TIMEFRAME</replaceable>, print an error and
+            exit with a nonzero code.  Scans all hosts unless a
+            specific host is given with <option>--host</option>.  The
+            parameter is in the format given to GNU <application>date</application>(1); for
+            instance,
+            --check "30 days ago".  Remember to enclose it in quotes
+            if it contains spaces.
+          </para>
         </listitem>
       </varlistentry>
+
       <varlistentry>
-        <term><option>-v</option>
-          <option>--version</option>
-        </term>
-        <listitem>
-          <para>Show version of program.</para>
+        <term><option>--host</option>
+        <replaceable>HOST</replaceable></term>
+        <listitem><para>
+            Gives the name of the host to back up.  This is both
+            passed to ssh and used to name the backup sets.
+          </para>
+          <para>
+            In a few situations, one may not wish to use the same name
+            for both.  It is recommend to use the Host and HostName
+            options in <filename>~/.ssh/config</filename> to configure aliases in this
+            situation.
+          </para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><option>--local</option>
+          <listitem><para>
+            Specifies that the host being backed up is local to the
+            machine.  Do not use ssh to contact it, and invoke the
+            wrapper directly.
+          </para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><option>--sshcmd
+            <replaceable>COMMAND</replaceable></option>
+          <listitem><para>
+            Gives the command to use to connect to the remote host.
+            Defaults to "ssh".  It may be used to select an
+            alternative configuration file or keypair.  Remember to
+            quote it per your shell if it contains spaces.  For example: 
+            --sshcmd "ssh -i /root/.id_rsa_simplesnap".  This command
+            is ignored when <option>--local</option> or
+            <option>--check</option> is given.
+          </para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><option>--setname <replaceable>SETNAME</replaceable></option></term>
+        <listitem><para>
+            Gives the backup set name.  Can just be a made-up word if
+            multiple sets are not needed; for instance, the hostname of
+            the backup server.  This is used as part of the snapshot
+            name.
+          </para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><option>--store
+        <replaceable>STORE</replaceable></option>
+          <listitem><para>Gives the ZFS dataset name where the data
+            will be stored.  Should not begin with a slash.  The
+            mountpoint will be obtained from the ZFS subsystem.
+            Always required.
+          </para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><option>--wrapcmd
+            <replaceable>COMMAND</replaceable></option>
+        <listitem><para>
+            Gives the path to simplesnapwrap (which must be on the
+            remote machine unless <option>--local</option> is given).
+            Not usually relevant, since the
+            <parameter>command</parameter> parameter in
+            <filename>~root/.ssh/authorized_keys</filename> gives the
+            path.  Default: "simplesnapwrap"
+          </para>
         </listitem>
       </varlistentry>
     </variablelist>
-  </refsect1>
   <refsect1>
     <title>SEE ALSO</title>
 
