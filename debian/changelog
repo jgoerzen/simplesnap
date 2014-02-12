@@ -1,3 +1,9 @@
+simplesnap (1.0.1) unstable; urgency=low
+
+  * Fixed exit code from simplesnap.
+
+ -- John Goerzen <jgoerzen@complete.org>  Wed, 12 Feb 2014 02:45:03 -0600
+
 simplesnap (1.0.0) unstable; urgency=low
 
   * Initial Release.  Closes: #738740.
