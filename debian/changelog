@@ -1,5 +1,5 @@
 simplesnap (1.0.0) unstable; urgency=low
 
-  * Initial Release.
+  * Initial Release.  Closes: #738740.
 
  -- John Goerzen <jgoerzen@complete.org>  Tue, 11 Feb 2014 00:44:47 -0600
