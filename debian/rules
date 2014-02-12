@@ -13,6 +13,6 @@
 	dh $@ 
 
 override_dh_auto_install-indep:
-	install -m 0755 -g root -u root simplesnap $(DESTDIR)/usr/sbin/
-	install -m 0755 -g root -u root simplesnapwrap $(DESTDIR)/usr/sbin/
+	install -m 0755 -g root -o root simplesnap $(DESTDIR)/usr/sbin/
+	install -m 0755 -g root -o root simplesnapwrap $(DESTDIR)/usr/sbin/
 
