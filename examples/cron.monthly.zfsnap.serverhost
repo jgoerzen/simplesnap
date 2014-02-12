@@ -1,0 +1,9 @@
+#!/bin/bash
+
+# Create monthly snapshots, lasting 3 months on the serverhost
+# (expiry time different on the backuphost)
+# The serverhost daily job will expire them.
+
+set -e
+
+/usr/sbin/zfSnap -a 3m -p hostname-monthly- -r tank

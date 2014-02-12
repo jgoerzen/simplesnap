@@ -1,0 +1,50 @@
+#!/bin/bash
+
+# Daily script to run on the backuphost.  Do the check of the backups and
+# clean up old snapshots.
+
+set -e
+
+# We load the SETNAME from a file I created with:
+# echo setname > /bakfs/local-simplesnap-setname
+SETNAME="`cat /bakfs/local-simplesnap-setname`"
+
+# Or you could simply say:
+# SETNAME="mainset"
+
+if [ -z "$SETNAME" ]; then
+   echo "Failure: couldn't find a setname"
+   exit 5
+fi
+
+# Where your backups are stored
+STORE="bakfs/simplesnap"
+
+SIMPLESNAP () {
+  simplesnap --store "$STORE" --setname "$SETNAME" \
+    "$@"
+}
+
+if SIMPLESNAP --check '3 days ago'; then
+  for HOSTDS in `zfs list -o name -H -r -d 1 -t filesystem "$STORE"`; do
+    if [ "$HOSTDS" = "$STORE" ]; then
+       continue    # Skip the simplesnap dataset itself
+    fi
+    HOSTNAME="`basename ${HOSTDS}`"
+
+    # Delete hourly snapshots more than 2 days old.
+    zfSnap -v -F 2d -p "${HOSTNAME}-hourly-"
+
+    # Delete daily snapshots more than 1 month old.
+    zfSnap -v -F 1m -p "${HOSTNAME}-daily-"
+
+    # Delete weekly snapshots more than 2 months old.
+    zfSnap -v -F 2m -p "${HOSTNAME}-weekly-"
+
+    # Delete monthly snapshots more than 18 months old.
+    zfSnap -v -F 18m -p "${HOSTNAME}-monthly-"
+  done
+else
+  echo "Check failed: $?, skipping snapshot cleanup."
+fi
+

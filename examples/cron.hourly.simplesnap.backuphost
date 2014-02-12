@@ -1,0 +1,38 @@
+#!/bin/bash
+
+# Reach out to each host hourly.  This script runs on the backuphost.
+
+set -e
+
+# We load the SETNAME from a file I created with:
+# echo setname > /bakfs/local-simplesnap-setname
+SETNAME="`cat /bakfs/local-simplesnap-setname`"
+
+# Or you could simply set it with:
+# SETNAME="mainset"
+
+SSHCMD="ssh -i /root/.ssh/id_rsa_simplesnap"
+
+if [ -z "$SETNAME" ]; then
+   echo "Failure: couldn't find a setname"
+   exit 5
+fi
+
+# Change this to where you store your backups.
+STORE="bakfs/simplesnap"
+
+SIMPLESNAP () {
+  simplesnap --store "$STORE" --setname "$SETNAME" \
+    --sshcmd "$SSHCMD" "$@"
+}
+
+for HOST in host1 host2 host3 host4; do
+  SIMPLESNAP --host $HOST || echo "Simplesnap failure on host $HOST: $?"
+done
+
+# Only do laptophost at certain times
+HOUR=`date +%H`
+if [ "$HOUR" -eq 12 ] || [ "$HOUR" -lt 7 ] || [ "$HOUR" -gt 23 ] ; then
+   SIMPLESNAP --host laptophost || true   # laptop, don't squawk
+fi
+

@@ -1,0 +1,16 @@
+#!/bin/bash
+
+# Create daily snapshots lasting 1 week on the serverhost
+# (different time on the backuphost)
+
+set -e
+
+/usr/sbin/zfSnap -a 1w -p hostname-daily- -r crypt/jgoerzen tank
+
+# Now apply the expiration settings for the other snapshots.
+
+/usr/sbin/zfSnap -d -p hostname-hourly-
+/usr/sbin/zfSnap -d -p hostname-daily-
+/usr/sbin/zfSnap -d -p hostname-weekly-
+/usr/sbin/zfSnap -d -p hostname-monthly-
+

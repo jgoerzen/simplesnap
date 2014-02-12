@@ -1,0 +1,9 @@
+#!/bin/bash
+
+# Create hourly snapshots, lasting 2 days on the serverhost
+# (expiry time different on the backuphost)
+# The serverhost daily job will expire them.
+
+set -e
+
+/usr/sbin/zfSnap -a 2d -p hostname-hourly- -r tank
