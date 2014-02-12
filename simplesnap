@@ -87,6 +87,8 @@ EOF
   exiterror "Syntax error: $1"
 }
 
+logit "Invoked as: $0 $*"
+
 while [ -n "$1" ]; do
   case "$1" in
     "--sshcmd")
@@ -277,3 +279,4 @@ for DATASET in ${REMOTEDATASETS}; do
   fi        
 done
 
+logit "Exiting successfully."
