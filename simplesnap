@@ -18,9 +18,29 @@
 
 set -e
 
+# Log a message
 logit () {
    logger -p info -t "`basename $0`[$$]" "$1"
 }
+
+# Log stdin with the given code.  Used normally to log stderr.
+logstdin () {
+   logger -p info -t "`basename $0`[$$/$1]"
+}
+
+# Run command, logging stderr and exit code
+runcommand () {
+   logit "Running $*"
+   if "$@" 2> >(logstdin "$1") ; then
+      logit "$1 exited successfully"
+      return 0
+   else
+       RETVAL="$?"
+       logit "$1 exited with error $RETVAL"
+       return "$RETVAL"
+   fi
+}
+
 
 exiterror () {
    logit "$1"
@@ -144,8 +164,7 @@ listsnaps () {
 CHECKRETVAL=0
 
 runzfs () {
-  logit "Running /sbin/zfs $*"
-  /sbin/zfs "$@"
+  runcommand /sbin/zfs "$@"
 }
 
 checkbackups () {
@@ -186,11 +205,9 @@ fi
 
 runwrap () {
   if [ "$LOCALMODE" = "on" ]; then
-    logit "Running on localhost: $WRAPCMD reinvoked $*"
-    "${WRAPCMD}" reinvoked "$@"
+    runcommand "${WRAPCMD}" reinvoked "$@"
   else
-    logit "Running $SSHCMD $WRAPCMD $*"
-    ${SSHCMD} ${HOST} ${WRAPCMD} "$@"
+    runcommand ${SSHCMD} ${HOST} ${WRAPCMD} "$@"
   fi
 }
 
@@ -236,8 +253,20 @@ reap () {
 logit "Finding remote datasets to back up"
 
 REMOTEDATASETS="`runwrap listfs`"
+DATASETPATTERN="^[a-zA-Z0-9_/.-]\+\$"
 for DATASET in ${REMOTEDATASETS}; do
-  if runwrap sendback "${SETNAME}" "${DATASET}" | \
+    if echo "a$DATASET" | $GREP -vq "$DATASETPATTERN"; then
+        logit "Dataset \"$DATASET\" contains invalid characters; pattern is $DATASETPATTERN"
+        continue
+    fi
+    if echo "a$DATASET" | $GREP -q "^[/-]"; then
+        exiterror "Dataset \"$DATASET\" begins with a / or a -; something is wrong.  Aborting."
+    fi
+    if echo "a$DATASET" | $GREP -q '\.\.'; then
+        exiterror "Dataset \"$DATASET\" contains ..; something is wrong.  Aborting."
+    fi
+
+    if runwrap sendback "${SETNAME}" "${DATASET}" | \
      runzfs receive -F "${STORE}/${HOST}/${DATASET}"; then
       logit "Received backup into ${STORE}/${HOST}/${DATASET}."
       runwrap reap "${SETNAME}" "${DATASET}"
