@@ -504,6 +504,16 @@ no-port-forwarding,no-X11-forwarding,no-pty ssh-rsa AAAA....
     <para>zfSnap (1), zfs (8).</para>
 
     <para>
+      The &simplesnap; homepage: <ulink
+      url="https://github.com/jgoerzen/simplesnap"></ulink>
+    </para>
+
+    <para>
+      The examples included with the &simplesnap; distribution, or on
+      its homepage.
+    </para>
+
+    <para>
       The zfSnap package compliments &simplesnap; perfectly.  Find it
       at
       <ulink url="https://github.com/graudeejs/zfSnap"></ulink>.

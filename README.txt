@@ -8,3 +8,4 @@ Or, if simplesnap is installed on your system, simply run:
 
    man simplesnap
 
+See also the examples included in the source distribution.
