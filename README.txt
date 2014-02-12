@@ -4,3 +4,7 @@ a network.
 It has excellent documentation.  See it at:
 <https://rawgithub.com/jgoerzen/simplesnap/master/doc/simplesnap.html>
 
+Or, if simplesnap is installed on your system, simply run:
+
+   man simplesnap
+
