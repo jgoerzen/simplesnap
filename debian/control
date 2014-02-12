@@ -4,12 +4,36 @@ Priority: extra
 Maintainer: John Goerzen <jgoerzen@complete.org>
 Build-Depends: debhelper (>= 8.0.0)
 Standards-Version: 3.9.3
-Homepage: <insert the upstream URL, if relevant>
-#Vcs-Git: git://git.debian.org/collab-maint/simplesnap.git
-#Vcs-Browser: http://git.debian.org/?p=collab-maint/simplesnap.git;a=summary
+Homepage: https://github.com/jgoerzen/simplesnap
+Vcs-Git: https://github.com/jgoerzen/simplesnap.git
+Vcs-Browser: https://github.com/jgoerzen/simplesnap
 
 Package: simplesnap
 Architecture: all
-Depends: ${misc:Depends}
-Description: <insert up to 60 chars description>
- <insert long description, indented with spaces>
+Depends: ${misc:Depends}, zfs-fuse | zfsutils | zfs, bsdutils, liblockfile-bin
+Suggests: zfsnap
+Description: Simple and powerful network transmission of ZFS snapshots
+ simplesnap is a simple way to send ZFS snapshots across a net‐
+ work. Although it can serve many purposes, its primary goal is
+ to manage backups from one ZFS filesystem to a backup filesystem
+ also running ZFS, using incremental backups to minimize network
+ traffic and disk usage.
+ .
+ simplesnap it is designed to perfectly compliment
+ snapshotting tools, permitting rotating backups with arbitrary
+ retention periods. It lets multiple machines back up a single
+ target, lets one machine back up multiple targets, and keeps it
+ all straight.
+ .
+ simplesnap is easy; there is no configuration file needed. One
+ ZFS property is available to exclude datasets/filesystems. ZFS
+ datasets are automatically discovered on machines being backed
+ up.
+ .
+ simplesnap  is robust in the face of interrupted
+ transfers, and needs little help to keep running.
+ .
+ nlike many similar tools, simplesnap does not
+ require full root access to the machines being backed up. It
+ runs only a small wrapper as root, and the wrapper has only three
+ commands it implements.
