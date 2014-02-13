@@ -745,7 +745,17 @@ R	/tank/store/host2/rpool/host2-1/var/cache/apt/pkgcache.bin.KdsMLu -> /tank/sto
       <para>
         Since &simplesnap; sends all snapshots, it is possible that
         locally-created snapshots made outside of your rotation scheme
-        will also be sent to your server.  
+        will also be sent to your backuphost.  These may not be
+        automatically reaped there, and may stick around.  An example
+        at the end of the
+        <filename>cron.daily.simplesnap.backuphost</filename> file
+        included with &simplesnap; is one way to check for these.
+        They could automatically be reaped with <command>zfs
+        destroy</command> as well, but this must be carefully tuned to
+        local requirements, so an example of doign that is
+        intentionally not supplied with the distribution.
+      </para>
+    </refsect2>
   </refsect1>
 
   <refsect1>
