@@ -803,6 +803,258 @@ CLASS="REFSECT1"
 NAME="AEN223"
 ></A
 ><H2
+>Backup Maintenance &#38; Interrogation</H2
+><P
+>      Since <SPAN
+CLASS="APPLICATION"
+>simplesnap</SPAN
+> stores backups in standard ZFS datasets, you
+      can use standard ZFS tools to obtain information about backups.
+      Here are some examples.
+    </P
+><DIV
+CLASS="REFSECT2"
+><A
+NAME="AEN227"
+></A
+><H3
+>Space used per host</H3
+><P
+>        Try something like this:
+      </P
+><PRE
+CLASS="PROGRAMLISTING"
+># zfs list -r -d 1 tank/store
+NAME               USED  AVAIL  REFER  MOUNTPOINT
+tank/store         540G   867G    34K  /tank/store
+tank/store/host1   473G   867G    32K  /tank/store/host1
+tank/store/host2  54.9G   867G    32K  /tank/store/host2
+tank/store/host3  12.2G   867G    31K  /tank/store/host3</PRE
+><P
+>        Here, you can see that the total size of the <SPAN
+CLASS="APPLICATION"
+>simplesnap</SPAN
+> data
+        is 540G - the USED value from the top level.  In this example,
+        host1 was using the most space -- 473G -- and host3 the least --
+        12.2G.  There is 867G available on this zpool for backups.
+      </P
+><P
+>        The <CODE
+CLASS="PARAMETER"
+>-r</CODE
+> parameter to <B
+CLASS="COMMAND"
+>zfs
+          list</B
+> requests a recursive report, but the
+        <CODE
+CLASS="PARAMETER"
+>-d 1</CODE
+> parameter sets a maximum depth of 1
+        -- so you can see just the top-level hosts without all their
+        component datasets.
+      </P
+></DIV
+><DIV
+CLASS="REFSECT2"
+><A
+NAME="AEN237"
+></A
+><H3
+>Space used by a host</H3
+><P
+>        Let's say that you had the above example, and want to drill down
+        into more detail.  Perhaps, for instance, we continue the above
+        example and drill down into host2:
+      </P
+><PRE
+CLASS="PROGRAMLISTING"
+># zfs list -r tank/store/host2
+NAME                                 USED  AVAIL  REFER  MOUNTPOINT
+tank/store/host2                    54.9G   867G    32K  /tank/...
+tank/store/host2/tank               49.8G   867G    32K  /tank/...
+tank/store/host2/tank/home          7.39G   867G  6.93G  /tank/...
+tank/store/host2/tank/vm            42.4G   867G    30K  /tank/...
+tank/store/host2/tank/vm/vm1        32.0G   867G  29.7G  -
+tank/store/host2/tank/vm/vm2        10.4G   867G  10.4G  -
+tank/store/host2/rpool              5.12G   867G    32K  /tank/...
+tank/store/host2/rpool/misc          521M   867G   521M  /tank/...
+tank/store/host2/rpool/host2-1      4.61G   867G    33K  /tank/...
+tank/store/host2/rpool/host2-1/ROOT  317M   867G   312M  /tank/...
+tank/store/host2/rpool/host2-1/usr  3.76G   867G  3.76G  /tank/...
+tank/store/host2/rpool/host2-1/var   554M   867G   401M  /tank/...</PRE
+><P
+>        I've trimmed the "mountpoint" column here so it doesn't get
+        too wide for the screen.
+      </P
+><P
+>        You see here the same 54.9G used as in the previous example,
+        but now you can trace it down.  There were two zpools on
+        host2: tank and rpool.  Most of the backup space -- 49.8G of
+        the 54.9G -- is used by tank, and only 5.12G by rpool.  And in
+        tank, 42.4G is used by vm.  Tracing it down, of that 42.4G
+        used by vm, 32G is in vm1 and 10.4G in vm2.  Notice how the
+        values at each level of the tree include their descendents.
+      </P
+><P
+>        So in this example, vm1 and vm2 are zvols corresponding to
+        virtual machines, and clearly take up a lot of space.  Notice
+        how vm1 says it uses 32.0G but in the refer column, it only
+        refers to 29.7G?  That means that the latest backup for vm2
+        used 29.7G, but when you add in the snapshots for that
+        dataset, the total space consumed is 32.0G.
+      </P
+><P
+>        Let's look at an alternative view that will make the size
+        consumed by snapshots more clear:
+      </P
+><PRE
+CLASS="PROGRAMLISTING"
+># zfs list -o space -r tank/store/host2
+NAME                         AVAIL   USED  USEDSNAP  USEDDS  USEDCHILD
+.../host2                     867G  54.9G         0     32K      54.9G
+.../host2/tank                867G  49.8G         0     32K      49.8G
+.../host2/tank/home           867G  7.39G      474M   6.93G          0
+.../host2/tank/vm             867G  42.4G       50K     30K      42.4G
+.../host2/tank/vm/vm1         867G  32.0G     2.35G   29.7G          0
+.../host2/tank/vm/vm1         867G  10.4G       49K   10.4G          0
+.../host2/rpool               867G  5.12G         0     32K      5.12G
+.../host2/rpool/misc          867G   521M       51K    521M          0
+.../host2/rpool/host2-1       867G  4.61G       51K     33K      4.61G
+.../host2/rpool/host2-1/ROOT  867G   317M     5.44M    312M          0
+.../host2/rpool/host2-1/usr   867G  3.76G      208K   3.76G          0
+.../host2/rpool/host2-1/var   867G   554M      153M    401M          0</PRE
+><P
+>        (Again, I've trimmed some irrelevant columns from this
+        output.)
+      </P
+><P
+>        The AVAIL and USED columns are the same as before, but now you
+        have a breakdown of what makes up the USED column.  USEDSNAP
+        is the space used by the snapshots of that particular
+        dataset.  USEDDS is the space used by that dataset directly --
+        the same value as was in REFER before.  And USEDCHILD is the
+        space used by descendents of that dataset.  
+      </P
+><P
+>        The USEDSNAP column is the
+        easiest way to see the impact your retention policies have on
+        your backup space consumption.
+      </P
+></DIV
+><DIV
+CLASS="REFSECT2"
+><A
+NAME="AEN249"
+></A
+><H3
+>Viewing snapshots of a dataset</H3
+><P
+>        Let's take one example from
+        before -- the 153M of snapshots in host2-1/var, and see what we
+        can find.
+      </P
+><PRE
+CLASS="PROGRAMLISTING"
+># zfs list -t snap -r tank/store/host2/rpool/host2-1/var 
+NAME                                              USED  AVAIL  REFER
+...
+.../var@host2-hourly-2014-02-11_05.17.02--2d       76K      -   402M
+.../var@host2-hourly-2014-02-11_06.17.01--2d       77K      -   402M
+.../var@host2-hourly-2014-02-11_07.17.01--2d     18.8M      -   402M
+.../var@host2-daily-2014-02-11_07.17.25--1w        79K      -   402M
+.../var@host2-hourly-2014-02-11_08.17.01--2d      156K      -   402M
+.../var@host2-monthly-2014-02-11_09.01.36--1m     114K      -   402M
+...</PRE
+><P
+>        In this output, the REFER column is the amount of data pointed
+        to by that snapshot -- that is, the size of /var at the moment
+        the snapshot is made.  And the USED column is the amount of
+        space that would be freed if just that snapshot were deleted.
+      </P
+><P
+>        Note this important point: it is normal for the sum of the
+        values in the USED column to be less than the space consumed
+        by the snapshots of the datasets as reported by USEDSNAP in
+        the previous example.  The reason is that the USED column is
+        the data unique to that one snapshot.  If, for instance, 100MB
+        of data existed on the system being backed up for
+        three hours yesterday, each snapshot could very well show less
+        than 100KB used, because that 100MB isn't unique to a
+        particular snapshot.  Until, that is, two of the three
+        snapshots referncing the 100MB data are destroyed; then the
+        USED value of the last one referencing it will suddenly jump
+        to 100MB higher because now it references unique data.
+      </P
+><P
+>        One other point -- an indication that the last backup was
+        successfully transmitted is the presence of a
+        __simplesnap_...__ snapshot at the end of the list.  Do not
+        delete it.
+      </P
+></DIV
+><DIV
+CLASS="REFSECT2"
+><A
+NAME="AEN256"
+></A
+><H3
+>Finding what changed over time</H3
+><P
+>        The <B
+CLASS="COMMAND"
+>zfs diff</B
+> command can let you see what
+        changed over time -- either across a single snapshot, or
+        across many.  Let's take a look.
+      </P
+><PRE
+CLASS="PROGRAMLISTING"
+># zfs diff .../var@host2-hourly-2014-02-11_05.17.02--2d \
+  .../var@host2-hourly-2014-02-11_06.17.01--2d \
+  | sort -k2 | less
+M	/tank/store/host2/rpool/host2-1/var/log/Xorg.0.log
+M	/tank/store/host2/rpool/host2-1/var/log/auth.log
+M	/tank/store/host2/rpool/host2-1/var/log/daemon.log
+...
+M	/tank/store/host2/rpool/host2-1/var/spool/anacron/cron.daily
+M	/tank/store/host2/rpool/host2-1/var/spool/anacron/cron.monthly
+M	/tank/store/host2/rpool/host2-1/var/spool/anacron/cron.weekly
+M	/tank/store/host2/rpool/host2-1/var/tmp</PRE
+><P
+>        Here you can see why there was just a few KB of changes in
+        that snapshot: mostly just a little bit of logging was
+        happening on the system.  Now let's inspect the larger
+        snapshot:
+      </P
+><PRE
+CLASS="PROGRAMLISTING"
+># zfs diff .../var@host2-hourly-2014-02-11_07.17.01--2d \
+   .../var@host2-daily-2014-02-11_07.17.25--1w \
+   | sort -k2 | less
+M	/tank/store/host2/rpool/host2-1/var/backups
++	/tank/store/host2/rpool/host2-1/var/backups/dpkg.status.0
+-	/tank/store/host2/rpool/host2-1/var/backups/dpkg.status.0
++	/tank/store/host2/rpool/host2-1/var/backups/dpkg.status.1.gz
+R	/tank/store/host2/rpool/host2-1/var/backups/dpkg.status.1.gz -&#62; /tank/store/host2/rpool/host2-1/var/backups/dpkg.status.2.gz
+R	/tank/store/host2/rpool/host2-1/var/backups/dpkg.status.2.gz -&#62; /tank/store/host2/rpool/host2-1/var/backups/dpkg.status.3.gz
+...
+M	/tank/store/host2/rpool/host2-1/var/cache/apt
+R	/tank/store/host2/rpool/host2-1/var/cache/apt/pkgcache.bin.KdsMLu -&#62; /tank/store/host2/rpool/host2-1/var/cache/apt/pkgcache.bin</PRE
+><P
+>        Here you can see some file rotation going on, and a temporary
+        file being renamed to permanent.  Normal daily activity on a
+        system, but now you know what was taking up space.
+      </P
+></DIV
+></DIV
+><DIV
+CLASS="REFSECT1"
+><A
+NAME="AEN264"
+></A
+><H2
 >SEE ALSO</H2
 ><P
 >zfSnap (1), zfs (8).</P
@@ -839,7 +1091,7 @@ TARGET="_top"
 ><DIV
 CLASS="REFSECT1"
 ><A
-NAME="AEN234"
+NAME="AEN275"
 ></A
 ><H2
 >AUTHOR</H2
