@@ -48,3 +48,8 @@ else
   echo "Check failed: $?, skipping snapshot cleanup."
 fi
 
+# If using zfSnap, this might be useful to find any extraneous snapshots to remove
+#if zfs list -H -o name -t snap -r "$STORE" | egrep -v "(-hourly-2|-daily-2|-weekly-2|-monthly-2|@__simplesnap_${SETNAME}_)"; then
+#  echo "Please clean up above snapshots."
+#  exit 5
+#fi

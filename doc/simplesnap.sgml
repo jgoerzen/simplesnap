@@ -242,7 +242,7 @@ manpage.1: manpage.sgml
       <para>
         The idea is that some system like <command>zfSnap</command> will be used on both ends to
         make periodic snapshots and clean them up.  One can use careful prefix
-        names with zfSnap to use different prefixes on each serverhost, and
+        names with zfSnap to use different prefixes on each activehost, and
         then implement custom cleanup rules with -F on the holderhost.
       </para>
     </refsect2>
@@ -326,7 +326,7 @@ no-port-forwarding,no-X11-forwarding,no-pty ssh-rsa AAAA....
       Now, back on the backuphost, you should be able to run:
     </para>
     <para>
-      <command>ssh -i ~/.ssh/id_rsa_simplesnap serverhost</command>
+      <command>ssh -i ~/.ssh/id_rsa_simplesnap activehost</command>
     </para>
     <para>
       say yes when asked if you want to add the key to the known_hosts
@@ -352,7 +352,7 @@ no-port-forwarding,no-X11-forwarding,no-pty ssh-rsa AAAA....
     </para>
 
     <para>
-      <command>simplesnap --host serverhost --setname mainset
+      <command>simplesnap --host activehost --setname mainset
         --store tank/simplesnap
         --sshcmd "ssh -i /root/.ssh/id_rsa_simplesnap"
       </command>
@@ -366,6 +366,12 @@ no-port-forwarding,no-X11-forwarding,no-pty ssh-rsa AAAA....
       Simple!
     </para>
 
+    <para>
+      Now, go test that you have the data you expected to: look at
+      your <replaceable>STORE</replaceable> filesystems and make sure
+      they have everything expected.  Test repeatedly over time that
+      you can restore as you expect from your backups.
+    </para>
   </refsect1>
 
   <refsect1>
@@ -712,7 +718,49 @@ R	/tank/store/host2/rpool/host2-1/var/cache/apt/pkgcache.bin.KdsMLu -> /tank/sto
     </refsect2>
   </refsect1>
   <refsect1>
-    <title>SEE ALSO</title>
+    <title>Warnings, Cautions, and Good Practices</title>
+    <refsect2>
+      <title>Importance of Testing</title>
+      <para>
+        Any backup scheme should be tested carefully before being
+        relied upon to serve its intended purpose.  This item is not
+        &simplesnap;-specific, but pertains to every backup solution:
+        test that you are backing up the data you expect to before you
+        need it.
+      </para>
+    </refsect2>
+    <refsect2>
+      <title>Use of zfs receive -F</title>
+      <para>
+        In order to account for various situations that could lead to
+        divergence of filesystems, including the simple act of mounting
+        them, &simplesnap; always uses <command>zfs receive
+          -F</command>.  Any local changes you make to the &simplesnap;
+        store datasets will be lost at any time.  If you need to make
+        local changes there, it is best to copy them elsewhere.
+      </para>
+    </refsect2>
+    <refsect2>
+      <title>Extraneous Snapshot Buildup</title>
+      <para>
+        Since &simplesnap; sends all snapshots, it is possible that
+        locally-created snapshots made outside of your rotation scheme
+        will also be sent to your server.  
+  </refsect1>
+
+  <refsect1>
+    <title>Bugs</title>
+    <para>
+      Ordinarily, an interrupted transfer is no problem for
+      &simplesnap;.  However, the very first transfer of a dataset
+      poses a bit of a problem, since the &simplesnap; wrapper can't
+      detect failure in this one special case.  If your first transfer
+      gets interrupted, simply zfs destroy the __simplesnap_...__
+      snapshot on the activehost and rerun.  NEVER DESTROY
+      __simplesnap SNAPSHOTS IN ANY OTHER SITUATION!
+    </para>
+  <refsect1>
+    <title>See Also</title>
 
     <para>zfSnap (1), zfs (8).</para>
 
