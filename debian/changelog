@@ -1,3 +1,10 @@
+simplesnap (1.0.2) unstable; urgency=low
+
+  * Enhanced logging in simplesnapwrap.
+  * Added information about interrogating the backup pool to the manpage.
+
+ -- John Goerzen <jgoerzen@complete.org>  Thu, 13 Feb 2014 00:47:10 -0600
+
 simplesnap (1.0.1) unstable; urgency=low
 
   * Fixed exit code from simplesnap.
