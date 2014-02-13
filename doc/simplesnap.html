@@ -397,7 +397,7 @@ CLASS="COMMAND"
 >zfSnap</B
 > will be used on both ends to
         make periodic snapshots and clean them up.  One can use careful prefix
-        names with zfSnap to use different prefixes on each serverhost, and
+        names with zfSnap to use different prefixes on each activehost, and
         then implement custom cleanup rules with -F on the holderhost.
       </P
 ></DIV
@@ -512,7 +512,7 @@ CLASS="COMMAND"
 ><P
 >      <B
 CLASS="COMMAND"
->ssh -i ~/.ssh/id_rsa_simplesnap serverhost</B
+>ssh -i ~/.ssh/id_rsa_simplesnap activehost</B
 >
     </P
 ><P
@@ -542,7 +542,7 @@ CLASS="COMMAND"
 ><P
 >      <B
 CLASS="COMMAND"
->simplesnap --host serverhost --setname mainset
+>simplesnap --host activehost --setname mainset
         --store tank/simplesnap
         --sshcmd "ssh -i /root/.ssh/id_rsa_simplesnap"
       </B
@@ -562,11 +562,22 @@ CLASS="FILENAME"
 ><P
 >      Simple!
     </P
+><P
+>      Now, go test that you have the data you expected to: look at
+      your <TT
+CLASS="REPLACEABLE"
+><I
+>STORE</I
+></TT
+> filesystems and make sure
+      they have everything expected.  Test repeatedly over time that
+      you can restore as you expect from your backups.
+    </P
 ></DIV
 ><DIV
 CLASS="REFSECT1"
 ><A
-NAME="AEN158"
+NAME="AEN160"
 ></A
 ><H2
 >Advanced: SETNAME usage</H2
@@ -598,7 +609,7 @@ CLASS="REPLACEABLE"
 ><DIV
 CLASS="REFSECT1"
 ><A
-NAME="AEN164"
+NAME="AEN166"
 ></A
 ><H2
 >Options</H2
@@ -800,7 +811,7 @@ CLASS="FILENAME"
 ><DIV
 CLASS="REFSECT1"
 ><A
-NAME="AEN223"
+NAME="AEN225"
 ></A
 ><H2
 >Backup Interrogation</H2
@@ -815,7 +826,7 @@ CLASS="APPLICATION"
 ><DIV
 CLASS="REFSECT2"
 ><A
-NAME="AEN227"
+NAME="AEN229"
 ></A
 ><H3
 >Space used per host</H3
@@ -859,7 +870,7 @@ CLASS="PARAMETER"
 ><DIV
 CLASS="REFSECT2"
 ><A
-NAME="AEN237"
+NAME="AEN239"
 ></A
 ><H3
 >Space used by a host</H3
@@ -946,7 +957,7 @@ NAME                         AVAIL   USED  USEDSNAP  USEDDS  USEDCHILD
 ><DIV
 CLASS="REFSECT2"
 ><A
-NAME="AEN249"
+NAME="AEN251"
 ></A
 ><H3
 >Viewing snapshots of a dataset</H3
@@ -997,7 +1008,7 @@ NAME                                              USED  AVAIL  REFER
 ><DIV
 CLASS="REFSECT2"
 ><A
-NAME="AEN256"
+NAME="AEN258"
 ></A
 ><H3
 >Finding what changed over time</H3
@@ -1052,10 +1063,140 @@ R	/tank/store/host2/rpool/host2-1/var/cache/apt/pkgcache.bin.KdsMLu -&#62; /tank
 ><DIV
 CLASS="REFSECT1"
 ><A
-NAME="AEN264"
+NAME="AEN266"
 ></A
 ><H2
->SEE ALSO</H2
+>Warnings, Cautions, and Good Practices</H2
+><DIV
+CLASS="REFSECT2"
+><A
+NAME="AEN268"
+></A
+><H3
+>Importance of Testing</H3
+><P
+>        Any backup scheme should be tested carefully before being
+        relied upon to serve its intended purpose.  This item is not
+        <SPAN
+CLASS="APPLICATION"
+>simplesnap</SPAN
+>-specific, but pertains to every backup solution:
+        test that you are backing up the data you expect to before you
+        need it.
+      </P
+></DIV
+><DIV
+CLASS="REFSECT2"
+><A
+NAME="AEN272"
+></A
+><H3
+>Use of zfs receive -F</H3
+><P
+>        In order to account for various situations that could lead to
+        divergence of filesystems, including the simple act of mounting
+        them, <SPAN
+CLASS="APPLICATION"
+>simplesnap</SPAN
+> always uses <B
+CLASS="COMMAND"
+>zfs receive
+          -F</B
+>.  Any local changes you make to the <SPAN
+CLASS="APPLICATION"
+>simplesnap</SPAN
+>
+        store datasets will be lost at any time.  If you need to make
+        local changes there, it is best to copy them elsewhere.
+      </P
+></DIV
+><DIV
+CLASS="REFSECT2"
+><A
+NAME="AEN278"
+></A
+><H3
+>Extraneous Snapshot Buildup</H3
+><P
+>        Since <SPAN
+CLASS="APPLICATION"
+>simplesnap</SPAN
+> sends all snapshots, it is possible that
+        locally-created snapshots made outside of your rotation scheme
+        will also be sent to your backuphost.  These may not be
+        automatically reaped there, and may stick around.  An example
+        at the end of the
+        <TT
+CLASS="FILENAME"
+>cron.daily.simplesnap.backuphost</TT
+> file
+        included with <SPAN
+CLASS="APPLICATION"
+>simplesnap</SPAN
+> is one way to check for these.
+        They could automatically be reaped with <B
+CLASS="COMMAND"
+>zfs
+        destroy</B
+> as well, but this must be carefully tuned to
+        local requirements, so an example of doign that is
+        intentionally not supplied with the distribution.
+      </P
+></DIV
+><DIV
+CLASS="REFSECT2"
+><A
+NAME="AEN285"
+></A
+><H3
+>Internal simplesnap snapshots</H3
+><P
+>        <SPAN
+CLASS="APPLICATION"
+>simplesnap</SPAN
+> creates snapshots beginning with __simplesnap_
+        followed by your <TT
+CLASS="REPLACEABLE"
+><I
+>SETNAME</I
+></TT
+>.  Do not
+        create, remove, or alter these snapshots in any way, either on
+        the activehost or the backuphost.   Doing so may lead to
+        unpredictable side-effects.
+      </P
+></DIV
+></DIV
+><DIV
+CLASS="REFSECT1"
+><A
+NAME="AEN290"
+></A
+><H2
+>Bugs</H2
+><P
+>      Ordinarily, an interrupted transfer is no problem for
+      <SPAN
+CLASS="APPLICATION"
+>simplesnap</SPAN
+>.  However, the very first transfer of a dataset
+      poses a bit of a problem, since the <SPAN
+CLASS="APPLICATION"
+>simplesnap</SPAN
+> wrapper can't
+      detect failure in this one special case.  If your first transfer
+      gets interrupted, simply zfs destroy the __simplesnap_...__
+      snapshot on the activehost and rerun.  NEVER DESTROY
+      __simplesnap SNAPSHOTS IN ANY OTHER SITUATION!
+    </P
+></DIV
+><DIV
+CLASS="REFSECT1"
+><A
+NAME="AEN295"
+></A
+><H2
+>See Also</H2
 ><P
 >zfSnap (1), zfs (8).</P
 ><P
@@ -1091,7 +1232,7 @@ TARGET="_top"
 ><DIV
 CLASS="REFSECT1"
 ><A
-NAME="AEN275"
+NAME="AEN306"
 ></A
 ><H2
 >AUTHOR</H2

@@ -132,7 +132,7 @@ data will come across next time.
 .PP
 The idea is that some system like \fBzfSnap\fR will be used on both ends to
 make periodic snapshots and clean them up.  One can use careful prefix
-names with zfSnap to use different prefixes on each serverhost, and
+names with zfSnap to use different prefixes on each activehost, and
 then implement custom cleanup rules with -F on the holderhost.
 .SH "QUICK START"
 .PP
@@ -191,7 +191,7 @@ tank/junkdata\fR
 .PP
 Now, back on the backuphost, you should be able to run:
 .PP
-\fBssh -i ~/.ssh/id_rsa_simplesnap serverhost\fR
+\fBssh -i ~/.ssh/id_rsa_simplesnap activehost\fR
 .PP
 say yes when asked if you want to add the key to the known_hosts
 file.  At this point, you should see output containing:
@@ -208,7 +208,7 @@ instance:
 .PP
 Now, you can run the backup:
 .PP
-\fBsimplesnap --host serverhost --setname mainset
+\fBsimplesnap --host activehost --setname mainset
 --store tank/simplesnap
 --sshcmd "ssh -i /root/.ssh/id_rsa_simplesnap"
 \fR
@@ -218,6 +218,11 @@ will see filesystems start to be populated under
 \fItank/simplesnap/host\fR\&.
 .PP
 Simple!
+.PP
+Now, go test that you have the data you expected to: look at
+your \fISTORE\fR filesystems and make sure
+they have everything expected.  Test repeatedly over time that
+you can restore as you expect from your backups.
 .SH "ADVANCED: SETNAME USAGE"
 .PP
 Most people will always use the same \fISETNAME\fR\&.  The \fISETNAME\fR is used to
@@ -481,6 +486,51 @@ R	/tank/store/host2/rpool/host2-1/var/cache/apt/pkgcache.bin.KdsMLu -> /tank/sto
 Here you can see some file rotation going on, and a temporary
 file being renamed to permanent.  Normal daily activity on a
 system, but now you know what was taking up space.
+.SH "WARNINGS, CAUTIONS, AND GOOD PRACTICES"
+.SS "IMPORTANCE OF TESTING"
+.PP
+Any backup scheme should be tested carefully before being
+relied upon to serve its intended purpose.  This item is not
+\fBsimplesnap\fR-specific, but pertains to every backup solution:
+test that you are backing up the data you expect to before you
+need it.
+.SS "USE OF ZFS RECEIVE -F"
+.PP
+In order to account for various situations that could lead to
+divergence of filesystems, including the simple act of mounting
+them, \fBsimplesnap\fR always uses \fBzfs receive
+-F\fR\&.  Any local changes you make to the \fBsimplesnap\fR
+store datasets will be lost at any time.  If you need to make
+local changes there, it is best to copy them elsewhere.
+.SS "EXTRANEOUS SNAPSHOT BUILDUP"
+.PP
+Since \fBsimplesnap\fR sends all snapshots, it is possible that
+locally-created snapshots made outside of your rotation scheme
+will also be sent to your backuphost.  These may not be
+automatically reaped there, and may stick around.  An example
+at the end of the
+\fIcron.daily.simplesnap.backuphost\fR file
+included with \fBsimplesnap\fR is one way to check for these.
+They could automatically be reaped with \fBzfs
+destroy\fR as well, but this must be carefully tuned to
+local requirements, so an example of doign that is
+intentionally not supplied with the distribution.
+.SS "INTERNAL SIMPLESNAP SNAPSHOTS"
+.PP
+\fBsimplesnap\fR creates snapshots beginning with __simplesnap_
+followed by your \fISETNAME\fR\&.  Do not
+create, remove, or alter these snapshots in any way, either on
+the activehost or the backuphost.   Doing so may lead to
+unpredictable side-effects.
+.SH "BUGS"
+.PP
+Ordinarily, an interrupted transfer is no problem for
+\fBsimplesnap\fR\&.  However, the very first transfer of a dataset
+poses a bit of a problem, since the \fBsimplesnap\fR wrapper can't
+detect failure in this one special case.  If your first transfer
+gets interrupted, simply zfs destroy the __simplesnap_...__
+snapshot on the activehost and rerun.  NEVER DESTROY
+__simplesnap SNAPSHOTS IN ANY OTHER SITUATION!
 .SH "SEE ALSO"
 .PP
 zfSnap (1), zfs (8).

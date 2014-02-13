@@ -756,6 +756,16 @@ R	/tank/store/host2/rpool/host2-1/var/cache/apt/pkgcache.bin.KdsMLu -> /tank/sto
         intentionally not supplied with the distribution.
       </para>
     </refsect2>
+    <refsect2>
+      <title>Internal simplesnap snapshots</title>
+      <para>
+        &simplesnap; creates snapshots beginning with __simplesnap_
+        followed by your <replaceable>SETNAME</replaceable>.  Do not
+        create, remove, or alter these snapshots in any way, either on
+        the activehost or the backuphost.   Doing so may lead to
+        unpredictable side-effects.
+      </para>
+    </refsect2>
   </refsect1>
 
   <refsect1>
