@@ -31,7 +31,14 @@ exiterror () {
 
 runzfs () {
   logit "Running: $ZFSCMD $*"
-  $ZFSCMD "$@"
+  if $ZFSCMD "$@"; then
+      logit "zfs exited successfully."
+      return 0
+  else
+      RETVAL="$?"
+      logit "zfs exited with error: $RETVAL"
+      return $RETVAL
+  fi
 }
 
 DATE="gdate"
@@ -132,6 +139,7 @@ if [ "$1" = "reinvoked" ]; then
        exiterror "Invalid mode \"${MODE}\" specified."
        ;;
     esac
+  logit "Exiting successfully."
   exit 0
 fi
 
