@@ -346,6 +346,15 @@ no-port-forwarding,no-X11-forwarding,no-pty ssh-rsa AAAA....
     <para>
       <command>zfs create tank/simplesnap</command>
     </para>
+    <para>
+      I often recommend compression for &simplesnap; datasets, so:
+    </para>
+    <para>
+      <command>zfs set compression=lz4 tank/simplesnap</command>
+    </para>
+    <para>
+      (If that gives an error, use compression=on instead.)
+    </para>
 
     <para>
       Now, you can run the backup:

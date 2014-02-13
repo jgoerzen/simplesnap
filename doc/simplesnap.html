@@ -537,6 +537,21 @@ CLASS="COMMAND"
 >
     </P
 ><P
+>      I often recommend compression for <SPAN
+CLASS="APPLICATION"
+>simplesnap</SPAN
+> datasets, so:
+    </P
+><P
+>      <B
+CLASS="COMMAND"
+>zfs set compression=lz4 tank/simplesnap</B
+>
+    </P
+><P
+>      (If that gives an error, use compression=on instead.)
+    </P
+><P
 >      Now, you can run the backup:
     </P
 ><P
@@ -577,7 +592,7 @@ CLASS="REPLACEABLE"
 ><DIV
 CLASS="REFSECT1"
 ><A
-NAME="AEN160"
+NAME="AEN165"
 ></A
 ><H2
 >Advanced: SETNAME usage</H2
@@ -609,7 +624,7 @@ CLASS="REPLACEABLE"
 ><DIV
 CLASS="REFSECT1"
 ><A
-NAME="AEN166"
+NAME="AEN171"
 ></A
 ><H2
 >Options</H2
@@ -811,7 +826,7 @@ CLASS="FILENAME"
 ><DIV
 CLASS="REFSECT1"
 ><A
-NAME="AEN225"
+NAME="AEN230"
 ></A
 ><H2
 >Backup Interrogation</H2
@@ -826,7 +841,7 @@ CLASS="APPLICATION"
 ><DIV
 CLASS="REFSECT2"
 ><A
-NAME="AEN229"
+NAME="AEN234"
 ></A
 ><H3
 >Space used per host</H3
@@ -870,7 +885,7 @@ CLASS="PARAMETER"
 ><DIV
 CLASS="REFSECT2"
 ><A
-NAME="AEN239"
+NAME="AEN244"
 ></A
 ><H3
 >Space used by a host</H3
@@ -957,7 +972,7 @@ NAME                         AVAIL   USED  USEDSNAP  USEDDS  USEDCHILD
 ><DIV
 CLASS="REFSECT2"
 ><A
-NAME="AEN251"
+NAME="AEN256"
 ></A
 ><H3
 >Viewing snapshots of a dataset</H3
@@ -1008,7 +1023,7 @@ NAME                                              USED  AVAIL  REFER
 ><DIV
 CLASS="REFSECT2"
 ><A
-NAME="AEN258"
+NAME="AEN263"
 ></A
 ><H3
 >Finding what changed over time</H3
@@ -1063,14 +1078,14 @@ R	/tank/store/host2/rpool/host2-1/var/cache/apt/pkgcache.bin.KdsMLu -&#62; /tank
 ><DIV
 CLASS="REFSECT1"
 ><A
-NAME="AEN266"
+NAME="AEN271"
 ></A
 ><H2
 >Warnings, Cautions, and Good Practices</H2
 ><DIV
 CLASS="REFSECT2"
 ><A
-NAME="AEN268"
+NAME="AEN273"
 ></A
 ><H3
 >Importance of Testing</H3
@@ -1088,7 +1103,7 @@ CLASS="APPLICATION"
 ><DIV
 CLASS="REFSECT2"
 ><A
-NAME="AEN272"
+NAME="AEN277"
 ></A
 ><H3
 >Use of zfs receive -F</H3
@@ -1113,7 +1128,7 @@ CLASS="APPLICATION"
 ><DIV
 CLASS="REFSECT2"
 ><A
-NAME="AEN278"
+NAME="AEN283"
 ></A
 ><H3
 >Extraneous Snapshot Buildup</H3
@@ -1146,7 +1161,7 @@ CLASS="COMMAND"
 ><DIV
 CLASS="REFSECT2"
 ><A
-NAME="AEN285"
+NAME="AEN290"
 ></A
 ><H3
 >Internal simplesnap snapshots</H3
@@ -1170,7 +1185,7 @@ CLASS="REPLACEABLE"
 ><DIV
 CLASS="REFSECT1"
 ><A
-NAME="AEN290"
+NAME="AEN295"
 ></A
 ><H2
 >Bugs</H2
@@ -1193,7 +1208,7 @@ CLASS="APPLICATION"
 ><DIV
 CLASS="REFSECT1"
 ><A
-NAME="AEN295"
+NAME="AEN300"
 ></A
 ><H2
 >See Also</H2
@@ -1232,7 +1247,7 @@ TARGET="_top"
 ><DIV
 CLASS="REFSECT1"
 ><A
-NAME="AEN306"
+NAME="AEN311"
 ></A
 ><H2
 >AUTHOR</H2

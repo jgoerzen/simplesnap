@@ -206,6 +206,12 @@ instance:
 .PP
 \fBzfs create tank/simplesnap\fR
 .PP
+I often recommend compression for \fBsimplesnap\fR datasets, so:
+.PP
+\fBzfs set compression=lz4 tank/simplesnap\fR
+.PP
+(If that gives an error, use compression=on instead.)
+.PP
 Now, you can run the backup:
 .PP
 \fBsimplesnap --host activehost --setname mainset
