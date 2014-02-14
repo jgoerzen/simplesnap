@@ -297,21 +297,21 @@ backupto() {
 }
 
 # If the user requested only one dataset to be backed up:
-if [ -n "$BACKUPDATASET" ]; then
-    logit "--backupdataset ${BACKUPDATASET} requested; not asking remote for dataset list."
+if [ -n "${BACKUPDATASET}" ]; then
+    logit "Option --backupdataset ${BACKUPDATASET} requested; not asking remote for dataset list."
 
     # If the user gave a specified location:
     if [ -n "${DATASETDEST}" ]; then
-        backupto "${DATASET}" "${DATASETDEST}"
+        backupto "${BACKUPDATASET}" "${DATASETDEST}"
     else
-        backupto "${DATASET}" "${STORE}/${HOST}/${DATASET}"
+        backupto "${BACKUPDATASET}" "${STORE}/${HOST}/${BACKUPDATASET}"
     fi
 else
     logit "Finding remote datasets to back up"
 
     REMOTEDATASETS="`runwrap listfs`"
     for DATASET in ${REMOTEDATASETS}; do
-        backupto "$DATASET" "${STORE}/${HOST}/${DATASET}"
+        backupto "${DATASET}" "${STORE}/${HOST}/${DATASET}"
     done
 fi
 
