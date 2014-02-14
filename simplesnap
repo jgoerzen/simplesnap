@@ -221,7 +221,7 @@ fi
 
 runwrap () {
   if [ "$LOCALMODE" = "on" ]; then
-    runcommand "${WRAPCMD}" reinvoked "$@"
+    runcommand "${WRAPCMD}" reinvoked simplesnapwrap "$@"
   else
     runcommand ${SSHCMD} ${HOST} ${WRAPCMD} "$@"
   fi
