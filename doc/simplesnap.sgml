@@ -64,6 +64,9 @@ manpage.1: manpage.sgml
       <command>&dhpackage;</command>
       <arg choice="opt"><option>--sshcmd</option>
         <replaceable>COMMAND</replaceable></arg>
+      <arg choice="opt"><option>--wrapcmd</option> <replaceable>COMMAND</replaceable></arg>
+      <arg choice="opt"><option>--only-dataset</option>
+        <replaceable>DATASET</replaceable></arg>
       <arg choice="opt"><option>--local</option></arg>
       <arg choice="plain"><option>--store</option> <replaceable>STORE</replaceable></arg>
       <arg choice="plain"><option>--setname</option>
@@ -80,7 +83,7 @@ manpage.1: manpage.sgml
       <arg choice="opt"><option>--host</option>
       <replaceable>HOST</replaceable></arg>
     </cmdsynopsis>
-      
+    
   </refsynopsisdiv>
   <refsect1>
     <title>Description</title>
@@ -458,6 +461,21 @@ no-port-forwarding,no-X11-forwarding,no-pty ssh-rsa AAAA....
             Specifies that the host being backed up is local to the
             machine.  Do not use ssh to contact it, and invoke the
             wrapper directly.
+          </para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><option>--only-dataset <replaceable>DATASET</replaceable></option>
+          <listitem><para>
+            Normally, &simplesnap; automatically obtains a list of
+            datasets to back up from the remote, and backs up all of
+            them except those that define the
+            <parameter>org.complete.simplesnap:exclude=on</parameter>
+            property.  With this option, &simplesnap; does not bother
+            to ask the remote for a list of datasets, and instead
+            backs up only the one precise
+          <replaceable>DATASET</replaceable> given.
           </para>
         </listitem>
       </varlistentry>

@@ -52,8 +52,8 @@ syntaxerror () {
    cat <<EOF
 Syntax: 
 
-$0 [--sshcmd CMD] [--local] [--wrapcmd CMD] --store STORE 
-   --setname NAME --host HOST
+$0 [--sshcmd CMD] [--local] [--wrapcmd CMD] [--only-dataset DATASET] 
+   --store STORE --setname NAME --host HOST
 
 or
 
@@ -83,6 +83,7 @@ Optional:
            --host.  The parameter is in the format given to date/gdate: 
            for instance, --check "30 days ago".  Remember to enclose it
            in quotes if it contains spaces.
+  
 EOF
   exiterror "Syntax error: $1"
 }
@@ -109,6 +110,10 @@ while [ -n "$1" ]; do
       ;;
     "--host")
       HOST="$2"
+      shift 2
+      ;;
+    "--only-dataset")
+      ONLYDATASET="$2"
       shift 2
       ;;
     "--check")
@@ -271,7 +276,7 @@ backupto() {
     fi
 
     if runwrap sendback "${SETNAME}" "${DATASET}" | \
-        runzfs receive -F "${DESTDIR}"; then
+       runzfs receive -F "${DESTDIR}"; then
 
         logit "Received backup into ${DESTDIR}"
         runwrap reap "${SETNAME}" "${DATASET}"
@@ -282,11 +287,16 @@ backupto() {
     fi        
 }
 
-logit "Finding remote datasets to back up"
+if [ -n "$ONLYDATASET" ]; then
+    logit "--only-dataset ${ONLYDATASET} requested; not asking remote for dataset list."
+    backupto "${DATASET}" "${STORE}/${HOST}/${DATASET}"
+else
+    logit "Finding remote datasets to back up"
 
-REMOTEDATASETS="`runwrap listfs`"
-for DATASET in ${REMOTEDATASETS}; do
-    backupto "$DATASET" "${STORE}/${HOST}/${DATASET}"
-done
+    REMOTEDATASETS="`runwrap listfs`"
+    for DATASET in ${REMOTEDATASETS}; do
+        backupto "$DATASET" "${STORE}/${HOST}/${DATASET}"
+    done
+fi
 
 logit "Exiting successfully."
