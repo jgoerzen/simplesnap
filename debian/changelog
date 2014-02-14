@@ -2,6 +2,7 @@ simplesnap (1.0.3) unstable; urgency=low
 
   * Add --backupdataset and --datasetdest options.
   * Enhance examples and documentation.
+  * Fixed bug in --local
 
  -- John Goerzen <jgoerzen@complete.org>  Fri, 14 Feb 2014 00:22:48 -0600
 
