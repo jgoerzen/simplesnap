@@ -3,14 +3,16 @@
 .\" <http://shell.ipoline.com/~elmert/comp/docbook2X/> 
 .\" Please send any bug reports, improvements, comments, patches, 
 .\" etc. to Steve Cheng <steve@ggi-project.org>.
-.TH "SIMPLESNAP" "8" "13 February 2014" "" ""
+.TH "SIMPLESNAP" "8" "14 February 2014" "" ""
 
 .SH NAME
 simplesnap \- Simple and powerful way to send ZFS snapshots across a    network
 .SH SYNOPSIS
 
 \fBsimplesnap\fR [ \fB--sshcmd
-\fICOMMAND\fB\fR ] [ \fB--local\fR ] \fB--store \fISTORE\fB\fR \fB--setname
+\fICOMMAND\fB\fR ] [ \fB--wrapcmd \fICOMMAND\fB\fR ] [ \fB--local\fR ] [ \fB--backupdataset
+\fIDATASET\fB
+ [ --datasetdest \fIDEST\fB ]\fR ] \fB--store \fISTORE\fB\fR \fB--setname
 \fINAME\fB\fR \fB--host
 \fIHOST\fB\fR
 
@@ -253,6 +255,19 @@ The normal \fBsimplesnap\fR mode is backing up.  An alternative
 check mode is available, which requires fewer parameters.  This
 mode is described below.
 .TP
+\fB--backupdataset \fIDATASET\fB \fR
+Normally, \fBsimplesnap\fR automatically obtains a list of
+datasets to back up from the remote, and backs up all of
+them except those that define the
+\fIorg.complete.simplesnap:exclude=on\fR
+property.  With this option, \fBsimplesnap\fR does not bother
+to ask the remote for a list of datasets, and instead
+backs up only the one precise
+\fIDATASET\fR given.  For now, ignored when
+\fB--check\fR is given, but that may change in
+the future.  It would be best to not specify this option
+with --check for now.
+.TP
 \fB--check \fITIMEFRAME\fB \fR
 Do not back up, but check existing backups.  If any
 datasets' newest backup is older than
@@ -263,6 +278,13 @@ parameter is in the format given to GNU \fBdate\fR(1); for
 instance,
 --check "30 days ago".  Remember to enclose it in quotes
 if it contains spaces.
+.TP
+\fB--datasetdest \fIDEST\fB \fR
+Valid only with \fB--backupdataset\fR, gives a
+specific destination for the backup, whith may be outside
+the \fISTORE\fR\&.  The \fISTORE\fR
+must still exist, as it is used for storing lockfiles and
+such.
 .TP
 \fB--host \fIHOST\fB\fR
 Gives the name of the host to back up.  This is both

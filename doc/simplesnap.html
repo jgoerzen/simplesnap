@@ -49,8 +49,34 @@ CLASS="REPLACEABLE"
 ></TT
 >] [<CODE
 CLASS="OPTION"
+>--wrapcmd</CODE
+> <TT
+CLASS="REPLACEABLE"
+><I
+>COMMAND</I
+></TT
+>] [<CODE
+CLASS="OPTION"
 >--local</CODE
->]  <CODE
+>] [<CODE
+CLASS="OPTION"
+>--backupdataset</CODE
+>
+        <TT
+CLASS="REPLACEABLE"
+><I
+>DATASET</I
+></TT
+>
+         [<CODE
+CLASS="OPTION"
+>--datasetdest</CODE
+> <TT
+CLASS="REPLACEABLE"
+><I
+>DEST</I
+></TT
+>]]  <CODE
 CLASS="OPTION"
 >--store</CODE
 > <TT
@@ -120,7 +146,7 @@ CLASS="REPLACEABLE"
 ><DIV
 CLASS="REFSECT1"
 ><A
-NAME="AEN48"
+NAME="AEN57"
 ></A
 ><H2
 >Description</H2
@@ -197,7 +223,7 @@ CLASS="EMPHASIS"
 ><DIV
 CLASS="REFSECT2"
 ><A
-NAME="AEN64"
+NAME="AEN73"
 ></A
 ><H3
 >Feature List</H3
@@ -264,7 +290,7 @@ CLASS="APPLICATION"
 ><DIV
 CLASS="REFSECT2"
 ><A
-NAME="AEN83"
+NAME="AEN92"
 ></A
 ><H3
 >Method of Operation</H3
@@ -405,7 +431,7 @@ CLASS="COMMAND"
 ><DIV
 CLASS="REFSECT1"
 ><A
-NAME="AEN116"
+NAME="AEN125"
 ></A
 ><H2
 >Quick Start</H2
@@ -592,7 +618,7 @@ CLASS="REPLACEABLE"
 ><DIV
 CLASS="REFSECT1"
 ><A
-NAME="AEN165"
+NAME="AEN174"
 ></A
 ><H2
 >Advanced: SETNAME usage</H2
@@ -624,7 +650,7 @@ CLASS="REPLACEABLE"
 ><DIV
 CLASS="REFSECT1"
 ><A
-NAME="AEN171"
+NAME="AEN180"
 ></A
 ><H2
 >Options</H2
@@ -653,6 +679,48 @@ CLASS="APPLICATION"
 ><DIV
 CLASS="VARIABLELIST"
 ><DL
+><DT
+><CODE
+CLASS="OPTION"
+>--backupdataset <TT
+CLASS="REPLACEABLE"
+><I
+>DATASET</I
+></TT
+></CODE
+></DT
+><DD
+><P
+>            Normally, <SPAN
+CLASS="APPLICATION"
+>simplesnap</SPAN
+> automatically obtains a list of
+            datasets to back up from the remote, and backs up all of
+            them except those that define the
+            <CODE
+CLASS="PARAMETER"
+>org.complete.simplesnap:exclude=on</CODE
+>
+            property.  With this option, <SPAN
+CLASS="APPLICATION"
+>simplesnap</SPAN
+> does not bother
+            to ask the remote for a list of datasets, and instead
+            backs up only the one precise
+            <TT
+CLASS="REPLACEABLE"
+><I
+>DATASET</I
+></TT
+> given.  For now, ignored when
+            <CODE
+CLASS="OPTION"
+>--check</CODE
+> is given, but that may change in
+            the future.  It would be best to not specify this option
+            with --check for now.
+          </P
+></DD
 ><DT
 ><CODE
 CLASS="OPTION"
@@ -685,6 +753,39 @@ CLASS="APPLICATION"
             instance,
             --check "30 days ago".  Remember to enclose it in quotes
             if it contains spaces.
+          </P
+></DD
+><DT
+><CODE
+CLASS="OPTION"
+>--datasetdest
+        <TT
+CLASS="REPLACEABLE"
+><I
+>DEST</I
+></TT
+></CODE
+></DT
+><DD
+><P
+>            Valid only with <CODE
+CLASS="OPTION"
+>--backupdataset</CODE
+>, gives a
+            specific destination for the backup, whith may be outside
+            the <TT
+CLASS="REPLACEABLE"
+><I
+>STORE</I
+></TT
+>.  The <TT
+CLASS="REPLACEABLE"
+><I
+>STORE</I
+></TT
+>
+            must still exist, as it is used for storing lockfiles and
+            such.
           </P
 ></DD
 ><DT
@@ -826,7 +927,7 @@ CLASS="FILENAME"
 ><DIV
 CLASS="REFSECT1"
 ><A
-NAME="AEN230"
+NAME="AEN259"
 ></A
 ><H2
 >Backup Interrogation</H2
@@ -841,7 +942,7 @@ CLASS="APPLICATION"
 ><DIV
 CLASS="REFSECT2"
 ><A
-NAME="AEN234"
+NAME="AEN263"
 ></A
 ><H3
 >Space used per host</H3
@@ -885,7 +986,7 @@ CLASS="PARAMETER"
 ><DIV
 CLASS="REFSECT2"
 ><A
-NAME="AEN244"
+NAME="AEN273"
 ></A
 ><H3
 >Space used by a host</H3
@@ -972,7 +1073,7 @@ NAME                         AVAIL   USED  USEDSNAP  USEDDS  USEDCHILD
 ><DIV
 CLASS="REFSECT2"
 ><A
-NAME="AEN256"
+NAME="AEN285"
 ></A
 ><H3
 >Viewing snapshots of a dataset</H3
@@ -1023,7 +1124,7 @@ NAME                                              USED  AVAIL  REFER
 ><DIV
 CLASS="REFSECT2"
 ><A
-NAME="AEN263"
+NAME="AEN292"
 ></A
 ><H3
 >Finding what changed over time</H3
@@ -1078,14 +1179,14 @@ R	/tank/store/host2/rpool/host2-1/var/cache/apt/pkgcache.bin.KdsMLu -&#62; /tank
 ><DIV
 CLASS="REFSECT1"
 ><A
-NAME="AEN271"
+NAME="AEN300"
 ></A
 ><H2
 >Warnings, Cautions, and Good Practices</H2
 ><DIV
 CLASS="REFSECT2"
 ><A
-NAME="AEN273"
+NAME="AEN302"
 ></A
 ><H3
 >Importance of Testing</H3
@@ -1103,7 +1204,7 @@ CLASS="APPLICATION"
 ><DIV
 CLASS="REFSECT2"
 ><A
-NAME="AEN277"
+NAME="AEN306"
 ></A
 ><H3
 >Use of zfs receive -F</H3
@@ -1128,7 +1229,7 @@ CLASS="APPLICATION"
 ><DIV
 CLASS="REFSECT2"
 ><A
-NAME="AEN283"
+NAME="AEN312"
 ></A
 ><H3
 >Extraneous Snapshot Buildup</H3
@@ -1161,7 +1262,7 @@ CLASS="COMMAND"
 ><DIV
 CLASS="REFSECT2"
 ><A
-NAME="AEN290"
+NAME="AEN319"
 ></A
 ><H3
 >Internal simplesnap snapshots</H3
@@ -1185,7 +1286,7 @@ CLASS="REPLACEABLE"
 ><DIV
 CLASS="REFSECT1"
 ><A
-NAME="AEN295"
+NAME="AEN324"
 ></A
 ><H2
 >Bugs</H2
@@ -1208,7 +1309,7 @@ CLASS="APPLICATION"
 ><DIV
 CLASS="REFSECT1"
 ><A
-NAME="AEN300"
+NAME="AEN329"
 ></A
 ><H2
 >See Also</H2
@@ -1247,7 +1348,7 @@ TARGET="_top"
 ><DIV
 CLASS="REFSECT1"
 ><A
-NAME="AEN311"
+NAME="AEN340"
 ></A
 ><H2
 >AUTHOR</H2

@@ -52,7 +52,8 @@ syntaxerror () {
    cat <<EOF
 Syntax: 
 
-$0 [--sshcmd CMD] [--local] [--wrapcmd CMD] [--backupdataset DATASET] 
+$0 [--sshcmd CMD] [--local] [--wrapcmd CMD] 
+   [--backupdataset DATASET [--datasetdest DEST]] 
    --store STORE --setname NAME --host HOST
 
 or
@@ -77,6 +78,9 @@ Optional:
              Not usually relevant, since this is set in
              ~/.ssh/authorized_keys.  Default: "simplesnapwrap"
   --local: The host is localhost; do not use remote tool to access it.
+  --backupdataset: Back up only the specified dataset instead of all.
+  --datasetdest: Valid only with --backupdataset; store the backup in
+                 the specified location.
   --check: Do not back up, but check existing backups.  If any are
            older than TIMEFRAME, print an error and exit with a nonzero
            code.  Scans all hosts unless a specific host is given with
@@ -292,9 +296,16 @@ backupto() {
     fi        
 }
 
+# If the user requested only one dataset to be backed up:
 if [ -n "$BACKUPDATASET" ]; then
     logit "--backupdataset ${BACKUPDATASET} requested; not asking remote for dataset list."
-    backupto "${DATASET}" "${STORE}/${HOST}/${DATASET}"
+
+    # If the user gave a specified location:
+    if [ -n "${DATASETDEST}" ]; then
+        backupto "${DATASET}" "${DATASETDEST}"
+    else
+        backupto "${DATASET}" "${STORE}/${HOST}/${DATASET}"
+    fi
 else
     logit "Finding remote datasets to back up"
 

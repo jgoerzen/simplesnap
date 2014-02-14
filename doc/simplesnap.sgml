@@ -65,9 +65,10 @@ manpage.1: manpage.sgml
       <arg choice="opt"><option>--sshcmd</option>
         <replaceable>COMMAND</replaceable></arg>
       <arg choice="opt"><option>--wrapcmd</option> <replaceable>COMMAND</replaceable></arg>
-      <arg choice="opt"><option>--backupdataset</option>
-        <replaceable>DATASET</replaceable></arg>
       <arg choice="opt"><option>--local</option></arg>
+      <arg choice="opt"><option>--backupdataset</option>
+        <replaceable>DATASET</replaceable>
+        <arg choice="opt"><option>--datasetdest</option> <replaceable>DEST</replaceable></arg></arg>
       <arg choice="plain"><option>--store</option> <replaceable>STORE</replaceable></arg>
       <arg choice="plain"><option>--setname</option>
         <replaceable>NAME</replaceable></arg>
@@ -424,6 +425,24 @@ no-port-forwarding,no-X11-forwarding,no-pty ssh-rsa AAAA....
 
     <variablelist>
       <varlistentry>
+        <term><option>--backupdataset <replaceable>DATASET</replaceable></option>
+          <listitem><para>
+            Normally, &simplesnap; automatically obtains a list of
+            datasets to back up from the remote, and backs up all of
+            them except those that define the
+            <parameter>org.complete.simplesnap:exclude=on</parameter>
+            property.  With this option, &simplesnap; does not bother
+            to ask the remote for a list of datasets, and instead
+            backs up only the one precise
+            <replaceable>DATASET</replaceable> given.  For now, ignored when
+            <option>--check</option> is given, but that may change in
+            the future.  It would be best to not specify this option
+            with --check for now.
+          </para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
         <term><option>--check <replaceable>TIMEFRAME</replaceable></option>
           <listitem><para>
             Do not back up, but check existing backups.  If any
@@ -435,6 +454,19 @@ no-port-forwarding,no-X11-forwarding,no-pty ssh-rsa AAAA....
             instance,
             --check "30 days ago".  Remember to enclose it in quotes
             if it contains spaces.
+          </para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><option>--datasetdest
+        <replaceable>DEST</replaceable></option>
+          <listitem><para>
+            Valid only with <option>--backupdataset</option>, gives a
+            specific destination for the backup, whith may be outside
+            the <replaceable>STORE</replaceable>.  The <replaceable>STORE</replaceable>
+            must still exist, as it is used for storing lockfiles and
+            such.
           </para>
         </listitem>
       </varlistentry>
@@ -461,24 +493,6 @@ no-port-forwarding,no-X11-forwarding,no-pty ssh-rsa AAAA....
             Specifies that the host being backed up is local to the
             machine.  Do not use ssh to contact it, and invoke the
             wrapper directly.
-          </para>
-        </listitem>
-      </varlistentry>
-
-      <varlistentry>
-        <term><option>--backupdataset <replaceable>DATASET</replaceable></option>
-          <listitem><para>
-            Normally, &simplesnap; automatically obtains a list of
-            datasets to back up from the remote, and backs up all of
-            them except those that define the
-            <parameter>org.complete.simplesnap:exclude=on</parameter>
-            property.  With this option, &simplesnap; does not bother
-            to ask the remote for a list of datasets, and instead
-            backs up only the one precise
-            <replaceable>DATASET</replaceable> given.  For now, ignored when
-            <option>--check</option> is given, but that may change in
-            the future.  It would be best to not specify this option
-            with --check for now.
           </para>
         </listitem>
       </varlistentry>
