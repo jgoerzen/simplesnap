@@ -1305,11 +1305,41 @@ CLASS="APPLICATION"
       snapshot on the activehost and rerun.  NEVER DESTROY
       __simplesnap SNAPSHOTS IN ANY OTHER SITUATION!
     </P
+><P
+>      If, by way of the 
+      <CODE
+CLASS="PARAMETER"
+>org.complete.simplesnap:exclude</CODE
+>
+      property or the <CODE
+CLASS="OPTION"
+>--backupdataset</CODE
+> or 
+      <CODE
+CLASS="OPTION"
+>--datasetdest</CODE
+> parameters, you do not request a
+      parent dataset to be backed up, but do request a descendent
+      dataset to be backed up, you may get an error on the first
+      backup
+      because the
+      dataset tree leading to the destination location for that
+      dataset has not yet been created.  <SPAN
+CLASS="APPLICATION"
+>simplesnap</SPAN
+> performs only
+      the narrow actions you request.  Running an appropriate
+      <B
+CLASS="COMMAND"
+>zfs create</B
+> command will rectify the
+      situation.
+    </P
 ></DIV
 ><DIV
 CLASS="REFSECT1"
 ><A
-NAME="AEN329"
+NAME="AEN335"
 ></A
 ><H2
 >See Also</H2
@@ -1348,7 +1378,7 @@ TARGET="_top"
 ><DIV
 CLASS="REFSECT1"
 ><A
-NAME="AEN340"
+NAME="AEN346"
 ></A
 ><H2
 >AUTHOR</H2
