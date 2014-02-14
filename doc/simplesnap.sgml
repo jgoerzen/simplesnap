@@ -65,7 +65,7 @@ manpage.1: manpage.sgml
       <arg choice="opt"><option>--sshcmd</option>
         <replaceable>COMMAND</replaceable></arg>
       <arg choice="opt"><option>--wrapcmd</option> <replaceable>COMMAND</replaceable></arg>
-      <arg choice="opt"><option>--only-dataset</option>
+      <arg choice="opt"><option>--backupdataset</option>
         <replaceable>DATASET</replaceable></arg>
       <arg choice="opt"><option>--local</option></arg>
       <arg choice="plain"><option>--store</option> <replaceable>STORE</replaceable></arg>
@@ -466,7 +466,7 @@ no-port-forwarding,no-X11-forwarding,no-pty ssh-rsa AAAA....
       </varlistentry>
 
       <varlistentry>
-        <term><option>--only-dataset <replaceable>DATASET</replaceable></option>
+        <term><option>--backupdataset <replaceable>DATASET</replaceable></option>
           <listitem><para>
             Normally, &simplesnap; automatically obtains a list of
             datasets to back up from the remote, and backs up all of

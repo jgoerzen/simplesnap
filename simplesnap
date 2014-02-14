@@ -52,7 +52,7 @@ syntaxerror () {
    cat <<EOF
 Syntax: 
 
-$0 [--sshcmd CMD] [--local] [--wrapcmd CMD] [--only-dataset DATASET] 
+$0 [--sshcmd CMD] [--local] [--wrapcmd CMD] [--backupdataset DATASET] 
    --store STORE --setname NAME --host HOST
 
 or
@@ -112,8 +112,12 @@ while [ -n "$1" ]; do
       HOST="$2"
       shift 2
       ;;
-    "--only-dataset")
-      ONLYDATASET="$2"
+    "--backupdataset")
+      BACKUPDATASET="$2"
+      shift 2
+      ;;
+    "--datasetdest")
+      DATASETDEST="$2"
       shift 2
       ;;
     "--check")
@@ -155,6 +159,7 @@ TEMPLATEPATTERN="^[a-zA-Z0-9]\+\$"
 echo "a${SETNAME}" | $GREP -q "${TEMPLATEPATTERN}" || syntaxerror "Invalid characters in setname \"${SETNAME}\"; pattern is \"${TEMPLATEPATTERN}\""
 echo "_${SETNAME}" | $GREP -qv '^_-' || syntaxerror "Set name cannot begin with a dash: \"${SETNAME}\""
 TEMPLATE="__simplesnap_${SETNAME}_"
+[ -n "$DATASETDEST" -a -z "$BACKUPDATASET" ] && syntaxerror "--datasetdest given without --backupdataset"
 
 MOUNTPOINT="`zfs list -H -o mountpoint -t filesystem \"${STORE}\"`"
 
@@ -287,8 +292,8 @@ backupto() {
     fi        
 }
 
-if [ -n "$ONLYDATASET" ]; then
-    logit "--only-dataset ${ONLYDATASET} requested; not asking remote for dataset list."
+if [ -n "$BACKUPDATASET" ]; then
+    logit "--backupdataset ${BACKUPDATASET} requested; not asking remote for dataset list."
     backupto "${DATASET}" "${STORE}/${HOST}/${DATASET}"
 else
     logit "Finding remote datasets to back up"
