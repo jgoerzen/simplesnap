@@ -475,7 +475,10 @@ no-port-forwarding,no-X11-forwarding,no-pty ssh-rsa AAAA....
             property.  With this option, &simplesnap; does not bother
             to ask the remote for a list of datasets, and instead
             backs up only the one precise
-          <replaceable>DATASET</replaceable> given.
+            <replaceable>DATASET</replaceable> given.  For now, ignored when
+            <option>--check</option> is given, but that may change in
+            the future.  It would be best to not specify this option
+            with --check for now.
           </para>
         </listitem>
       </varlistentry>
