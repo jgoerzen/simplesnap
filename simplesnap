@@ -159,6 +159,10 @@ ggrep &> /dev/null || GREP="grep"
 [ -n "$CHECKMODE" -o -n "$HOST" ] || syntaxerror "Missing --host"
 
 echo "_${STORE}" | $GREP -qv " " || syntaxerror "Space in --store: ${STORE}"
+if [ -n "${DATASETDEST}" ]; then
+    echo "_${DATASETDEST}" | $GREP -qv " " || syntaxerror "Space in --datasetdest: ${DATASETDEST}"
+fi
+
 TEMPLATEPATTERN="^[a-zA-Z0-9]\+\$"
 echo "a${SETNAME}" | $GREP -q "${TEMPLATEPATTERN}" || syntaxerror "Invalid characters in setname \"${SETNAME}\"; pattern is \"${TEMPLATEPATTERN}\""
 echo "_${SETNAME}" | $GREP -qv '^_-' || syntaxerror "Set name cannot begin with a dash: \"${SETNAME}\""
