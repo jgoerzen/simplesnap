@@ -252,31 +252,41 @@ reap () {
 }
   
 
-logit "Finding remote datasets to back up"
+backupto() {
+    DATASET="$1"
+    DESTDIR="$2"
+    DATASETPATTERN="^[a-zA-Z0-9_/.-]\+\$"
 
-REMOTEDATASETS="`runwrap listfs`"
-DATASETPATTERN="^[a-zA-Z0-9_/.-]\+\$"
-for DATASET in ${REMOTEDATASETS}; do
     if echo "a$DATASET" | $GREP -vq "$DATASETPATTERN"; then
         logit "Dataset \"$DATASET\" contains invalid characters; pattern is $DATASETPATTERN"
-        continue
+        return
     fi
+
     if echo "a$DATASET" | $GREP -q "^[/-]"; then
         exiterror "Dataset \"$DATASET\" begins with a / or a -; something is wrong.  Aborting."
     fi
+
     if echo "a$DATASET" | $GREP -q '\.\.'; then
         exiterror "Dataset \"$DATASET\" contains ..; something is wrong.  Aborting."
     fi
 
     if runwrap sendback "${SETNAME}" "${DATASET}" | \
-     runzfs receive -F "${STORE}/${HOST}/${DATASET}"; then
-      logit "Received backup into ${STORE}/${HOST}/${DATASET}."
-      runwrap reap "${SETNAME}" "${DATASET}"
-      reap "${STORE}/${HOST}/${DATASET}"
-  else
-      logit "zfs receive died with error: $?"
-      exit 100
-  fi        
+        runzfs receive -F "${DESTDIR}"; then
+
+        logit "Received backup into ${DESTDIR}"
+        runwrap reap "${SETNAME}" "${DATASET}"
+        reap "${DESTDIR}"
+    else
+        logit "zfs receive died with error: $?"
+        exit 100
+    fi        
+}
+
+logit "Finding remote datasets to back up"
+
+REMOTEDATASETS="`runwrap listfs`"
+for DATASET in ${REMOTEDATASETS}; do
+    backupto "$DATASET" "${STORE}/${HOST}/${DATASET}"
 done
 
 logit "Exiting successfully."
