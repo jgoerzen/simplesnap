@@ -1,4 +1,6 @@
 *~
 doc/*.links
 doc/*.refs
+pkg/
+dist/
 
