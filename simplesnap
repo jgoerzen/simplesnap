@@ -145,11 +145,11 @@ SSHCMD="${SSHCMD:-ssh}"
 WRAPCMD="${WRAPCMD:-simplesnapwrap}"
 
 DATE="gdate"
-gdate &> /dev/null || DATE="date"
+gdate &> /dev/null || [ $? -eq 127 ] && DATE="date"
 SED="gsed"
-gsed &> /dev/null || SED="sed"
+gsed &> /dev/null || [ $? -eq 127 ] && SED="sed"
 GREP="ggrep"
-ggrep &> /dev/null || GREP="grep"
+ggrep &> /dev/null || [ $? -eq 127 ] && GREP="grep"
 
 
 # Validating
