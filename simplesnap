@@ -145,11 +145,13 @@ SSHCMD="${SSHCMD:-ssh}"
 WRAPCMD="${WRAPCMD:-simplesnapwrap}"
 
 DATE="gdate"
-gdate &> /dev/null || DATE="date"
+gdate &> /dev/null || [ $? -eq 127 ] && DATE="date"
 SED="gsed"
-gsed &> /dev/null || SED="sed"
+gsed &> /dev/null || [ $? -eq 127 ] && SED="sed"
 GREP="ggrep"
-ggrep &> /dev/null || GREP="grep"
+ggrep &> /dev/null || [ $? -eq 127 ] && GREP="grep"
+HEAD="ghead"
+ghead -h &> /dev/null || [ $? -eq 127 ] && HEAD="head"
 
 
 # Validating
@@ -257,7 +259,7 @@ fi
 reap () {
   DATASET="$1"
        # We always save the most recent.
-       SNAPSTOREMOVE="`listsnaps \"${TEMPLATE}\" \"${DATASET}\" | head -n -1`"
+       SNAPSTOREMOVE="`listsnaps \"${TEMPLATE}\" \"${DATASET}\" | $HEAD -n -1`"
        if [ -z "${SNAPSTOREMOVE}" ]; then
          logit "No snapshots to remove."
        else
