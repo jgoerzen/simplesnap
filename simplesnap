@@ -2,7 +2,7 @@
 
 # Simple snapshot manager
 
-# Copyright (c) 2014 John Goerzen
+# Copyright (c) 2014-2017 John Goerzen
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
 #   the Free Software Foundation, either version 3 of the License, or
@@ -23,6 +23,11 @@ logit () {
    logger -p info -t "`basename $0`[$$]" "$1"
 }
 
+# Log an error message
+logerror () {
+   logger -p err -t "`basename $0`[$$]" "$1"
+}
+
 # Log stdin with the given code.  Used normally to log stderr.
 logstdin () {
    logger -p info -t "`basename $0`[$$/$1]"
@@ -36,14 +41,14 @@ runcommand () {
       return 0
    else
        RETVAL="$?"
-       logit "$1 exited with error $RETVAL"
+       logerror "$1 exited with error $RETVAL"
        return "$RETVAL"
    fi
 }
 
 
 exiterror () {
-   logit "$1"
+   logerror "$1"
    echo "$1" 1>&2
    exit 10
 }
@@ -297,7 +302,7 @@ backupto() {
         runwrap reap "${SETNAME}" "${DATASET}"
         reap "${DESTDIR}"
     else
-        logit "zfs receive died with error: $?"
+        logerror "zfs receive died with error: $?"
         exit 100
     fi        
 }
