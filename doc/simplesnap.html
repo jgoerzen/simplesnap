@@ -823,7 +823,16 @@ CLASS="OPTION"
 ><P
 >            Specifies that the host being backed up is local to the
             machine.  Do not use ssh to contact it, and invoke the
-            wrapper directly.
+            wrapper directly.  You would not need to
+            give <CODE
+CLASS="OPTION"
+>--sshcmd</CODE
+> in this case.  For
+            instance: <B
+CLASS="COMMAND"
+>simplesnap --local --store
+                /bakfs/simplesnap --host server1 --setname bak1</B
+>
           </P
 ></DD
 ><DT
@@ -927,7 +936,7 @@ CLASS="FILENAME"
 ><DIV
 CLASS="REFSECT1"
 ><A
-NAME="AEN259"
+NAME="AEN261"
 ></A
 ><H2
 >Backup Interrogation</H2
@@ -942,7 +951,7 @@ CLASS="APPLICATION"
 ><DIV
 CLASS="REFSECT2"
 ><A
-NAME="AEN263"
+NAME="AEN265"
 ></A
 ><H3
 >Space used per host</H3
@@ -986,7 +995,7 @@ CLASS="PARAMETER"
 ><DIV
 CLASS="REFSECT2"
 ><A
-NAME="AEN273"
+NAME="AEN275"
 ></A
 ><H3
 >Space used by a host</H3
@@ -1073,7 +1082,7 @@ NAME                         AVAIL   USED  USEDSNAP  USEDDS  USEDCHILD
 ><DIV
 CLASS="REFSECT2"
 ><A
-NAME="AEN285"
+NAME="AEN287"
 ></A
 ><H3
 >Viewing snapshots of a dataset</H3
@@ -1124,7 +1133,7 @@ NAME                                              USED  AVAIL  REFER
 ><DIV
 CLASS="REFSECT2"
 ><A
-NAME="AEN292"
+NAME="AEN294"
 ></A
 ><H3
 >Finding what changed over time</H3
@@ -1179,14 +1188,14 @@ R	/tank/store/host2/rpool/host2-1/var/cache/apt/pkgcache.bin.KdsMLu -&#62; /tank
 ><DIV
 CLASS="REFSECT1"
 ><A
-NAME="AEN300"
+NAME="AEN302"
 ></A
 ><H2
 >Warnings, Cautions, and Good Practices</H2
 ><DIV
 CLASS="REFSECT2"
 ><A
-NAME="AEN302"
+NAME="AEN304"
 ></A
 ><H3
 >Importance of Testing</H3
@@ -1204,7 +1213,7 @@ CLASS="APPLICATION"
 ><DIV
 CLASS="REFSECT2"
 ><A
-NAME="AEN306"
+NAME="AEN308"
 ></A
 ><H3
 >Use of zfs receive -F</H3
@@ -1229,7 +1238,7 @@ CLASS="APPLICATION"
 ><DIV
 CLASS="REFSECT2"
 ><A
-NAME="AEN312"
+NAME="AEN314"
 ></A
 ><H3
 >Extraneous Snapshot Buildup</H3
@@ -1262,7 +1271,7 @@ CLASS="COMMAND"
 ><DIV
 CLASS="REFSECT2"
 ><A
-NAME="AEN319"
+NAME="AEN321"
 ></A
 ><H3
 >Internal simplesnap snapshots</H3
@@ -1286,7 +1295,7 @@ CLASS="REPLACEABLE"
 ><DIV
 CLASS="REFSECT1"
 ><A
-NAME="AEN324"
+NAME="AEN326"
 ></A
 ><H2
 >Bugs</H2
@@ -1339,7 +1348,7 @@ CLASS="COMMAND"
 ><DIV
 CLASS="REFSECT1"
 ><A
-NAME="AEN335"
+NAME="AEN337"
 ></A
 ><H2
 >See Also</H2
@@ -1378,7 +1387,7 @@ TARGET="_top"
 ><DIV
 CLASS="REFSECT1"
 ><A
-NAME="AEN346"
+NAME="AEN348"
 ></A
 ><H2
 >AUTHOR</H2
