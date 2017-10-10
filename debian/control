@@ -10,7 +10,7 @@ Vcs-Browser: https://github.com/jgoerzen/simplesnap
 
 Package: simplesnap
 Architecture: all
-Depends: ${misc:Depends}, zfs-fuse | zfsutils | zfs, liblockfile-bin
+Depends: ${misc:Depends}, zfsutils | zfsutils-linux | zfs-fuse, liblockfile-bin
 Suggests: zfsnap
 Description: Simple and powerful network transmission of ZFS snapshots
  simplesnap is a simple way to send ZFS snapshots across a net‐
