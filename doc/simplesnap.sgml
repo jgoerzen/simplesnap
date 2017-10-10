@@ -44,7 +44,7 @@ manpage.1: manpage.sgml
       &dhsurname;
     </author>
     <copyright>
-      <year>2014</year>
+      <year>2014-2017</year>
       <holder>&dhusername;</holder>
     </copyright>
   </refentryinfo>
@@ -492,7 +492,10 @@ no-port-forwarding,no-X11-forwarding,no-pty ssh-rsa AAAA....
           <listitem><para>
             Specifies that the host being backed up is local to the
             machine.  Do not use ssh to contact it, and invoke the
-            wrapper directly.
+            wrapper directly.  You would not need to
+            give <option>--sshcmd</option> in this case.  For
+            instance: <command>simplesnap --local --store
+                /bakfs/simplesnap --host server1 --setname bak1</command>
           </para>
         </listitem>
       </varlistentry>
