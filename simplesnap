@@ -192,11 +192,11 @@ runzfs () {
 
 checkbackups () {
   CHECKHOST="$1"
-  DATASETS="`runzfs list -t filesystem,volume -o name -H -r \"${STORE}/${HOST}\"`"
+  DATASETS="`runzfs list -t filesystem,volume -o name -H -r \"${STORE}/${CHECKHOST}\"`"
   CUTOFF="`$DATE -d \"${CHECKMODE}\" +%s`"
   for CHECKDS in ${DATASETS}; do
     # Don't check the top-level host dataset itself.
-    if [ "${CHECKDS}" = "${STORE}/${HOST}" ]; then
+    if [ "${CHECKDS}" = "${STORE}/${CHECKHOST}" ]; then
         continue
     fi
 
