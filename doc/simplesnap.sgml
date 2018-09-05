@@ -799,7 +799,7 @@ R	/tank/store/host2/rpool/host2-1/var/cache/apt/pkgcache.bin.KdsMLu -> /tank/sto
         included with &simplesnap; is one way to check for these.
         They could automatically be reaped with <command>zfs
         destroy</command> as well, but this must be carefully tuned to
-        local requirements, so an example of doign that is
+        local requirements, so an example of doing that is
         intentionally not supplied with the distribution.
       </para>
     </refsect2>
