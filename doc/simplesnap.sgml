@@ -158,6 +158,13 @@ manpage.1: manpage.sgml
         </listitem>
 
         <listitem><para>
+            Optionally supports ZFS bookmarks, preventing
+            backup-related snapshots from consuming space on the
+            system being backed up.
+          </para>
+        </listitem>
+
+        <listitem><para>
             Is a small program, easily audited.  In fact, most of the code is devoted to sanity-checking, security, and error
             checking.
           </para>

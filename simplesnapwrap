@@ -163,6 +163,18 @@ if [ "$1" = "reinvoked" ]; then
             $ZFS destroy "${REMOVAL}"
          done
        fi
+
+       # We always save the most recent.
+       BOOKSTOREMOVE="`listbookmarks \"${TEMPLATE}\" \"${DATASET}\" | head -n -1`"
+       if [ -z "${BOOKSTOREMOVE}" ]; then
+         logit "No bookmarks to remove."
+       else
+         for REMOVAL in ${BOOKSTOREMOVE}; do
+            logit "Destroying bookmark ${REMOVAL}"
+            echo "_${REMOVAL}" | $GREP -q '#' || exiterror "PANIC: bookmark name doesn't contain '#'"
+            $ZFS destroy "${REMOVAL}"
+         done
+       fi
        ;;
     *)
        exiterror "Invalid mode \"${MODE}\" specified."
