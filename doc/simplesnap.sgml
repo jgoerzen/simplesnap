@@ -413,6 +413,11 @@ no-port-forwarding,no-X11-forwarding,no-pty ssh-rsa AAAA....
     </para>
   </refsect1>
 
+  <refsect1>
+    <title>Advanced: ZFS bookmarks</title>
+    <para>
+      &simplesnap; implements a fairly typical ZFS incremental backup
+      strategy.   
 
   <refsect1>
     <title>Options</title>

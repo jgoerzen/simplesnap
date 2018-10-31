@@ -65,14 +65,14 @@ listbookmarks () {
 PATTERN="^[a-zA-Z0-9_/. -]\+\$"
 if [ "$1" = "reinvoked" ]; then
   shift
-  logit "Reinvoked with paramters \"$*\""
+  logit "Reinvoked with paramaters \"$*\""
   shift # Drop the call to simplesnapwrap
 
   # Validate again.  Just to be sure.
   echo ".$*" | $GREP -q "${PATTERN}" || exiterror "Invalid characters found on re-validate; pattern is ${PATTERN}"
   echo ".$*" | $GREP -vq '\.\.' || exiterror "Found .. in input; aborting."
 
-  # We don't want any paramters to contain a space or leading dash.
+  # We don't want any paramaters to contain a space or leading dash.
   for ARG; do
     echo ",${ARG}" | $GREP -vq '^,-' || exiterror "Found leading '-' in parameter \"${ARG}\"; aborting."
     echo ",${ARG}" | $GREP -vq ' ' || exiterror "Found space in parameters; aborting."
