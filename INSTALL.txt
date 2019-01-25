@@ -19,6 +19,11 @@ probably work on FreeBSD or Solaris as well, especially if the GNU
 tools are installed or available under "g" names.  The script will try
 to find them with those names and use them if possible.
 
+  To install MacOS prerequisites using Homebrew (https://brew.sh):
+
+   * brew install coreutils grep gnu-sed liblockfile
+
+
 INSTALLATION
 
 Copy simplesnap somewhere on the host that will store backups and mark
