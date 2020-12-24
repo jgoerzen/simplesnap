@@ -195,30 +195,30 @@ CLASS="EMPHASIS"
 >      <SPAN
 CLASS="APPLICATION"
 >simplesnap</SPAN
-> is <SPAN
+> is designed to maximize <SPAN
 CLASS="emphasis"
 ><I
 CLASS="EMPHASIS"
->SAFE</I
+>SAFETY</I
 ></SPAN
->; it is robust in the
-      face of interrupted transfers, and needs little help to keep
+>; it is
+      robust in the face of interrupted transfers, and needs little help to keep
       running.
     </P
 ><P
 >      <SPAN
 CLASS="APPLICATION"
 >simplesnap</SPAN
-> is <SPAN
+> is designed to maximize <SPAN
 CLASS="emphasis"
 ><I
 CLASS="EMPHASIS"
->SECURE</I
+>SECURITY</I
 ></SPAN
->; unlike many similar
-      tools, it does not require full root access to the machines
-      being backed up.  It runs only a small wrapper as root, and the
-      wrapper has only three commands it implements.
+>; unlike
+      many similar tools, it does not require full root access to the machines
+      being backed up.  It runs only a small wrapper as root, and the wrapper
+      has only three commands it implements.
     </P
 ><DIV
 CLASS="REFSECT2"
@@ -262,6 +262,13 @@ CLASS="APPLICATION"
 ></LI
 ><LI
 ><P
+>            Optionally supports ZFS bookmarks, preventing
+            backup-related snapshots from consuming space on the
+            system being backed up.
+          </P
+></LI
+><LI
+><P
 >            Is a small program, easily audited.  In fact, most of the code is devoted to sanity-checking, security, and error
             checking.
           </P
@@ -290,7 +297,7 @@ CLASS="APPLICATION"
 ><DIV
 CLASS="REFSECT2"
 ><A
-NAME="AEN92"
+NAME="AEN94"
 ></A
 ><H3
 >Method of Operation</H3
@@ -431,7 +438,7 @@ CLASS="COMMAND"
 ><DIV
 CLASS="REFSECT1"
 ><A
-NAME="AEN125"
+NAME="AEN127"
 ></A
 ><H2
 >Quick Start</H2
@@ -618,7 +625,7 @@ CLASS="REPLACEABLE"
 ><DIV
 CLASS="REFSECT1"
 ><A
-NAME="AEN174"
+NAME="AEN176"
 ></A
 ><H2
 >Advanced: SETNAME usage</H2
@@ -650,7 +657,54 @@ CLASS="REPLACEABLE"
 ><DIV
 CLASS="REFSECT1"
 ><A
-NAME="AEN180"
+NAME="AEN182"
+></A
+><H2
+>Advanced: ZFS bookmarks</H2
+><P
+>      <SPAN
+CLASS="APPLICATION"
+>simplesnap</SPAN
+> implements a fairly typical ZFS incremental backup
+      strategy.  Newer versions of ZFS support bookmarks.  Bookmarks
+      consume no space on the server, while snapshots keep their space held.
+    </P
+><P
+>      In practice, this is generally not a problem for backups, since
+      snapshots are frequently transferred and old ones removed.  In some
+      infrequent backup situations, it may be a larger issue, and for those
+      situations, <SPAN
+CLASS="APPLICATION"
+>simplesnap</SPAN
+> supports bookmarks.
+    </P
+><P
+>      Please note, however, that bookmark support in <SPAN
+CLASS="APPLICATION"
+>simplesnap</SPAN
+> is not
+      well-used or well-tested; please verify proper operation on non-production
+      data before attempting to use it for anything important.
+    </P
+><P
+>      One caveat with bookmarks is that zfs send -I is not supported with them;
+      instead, <SPAN
+CLASS="APPLICATION"
+>simplesnap</SPAN
+> has to fall back to zfs send -i.  This causes the
+      intermediate snapshots to not be transferred.  You can work around this by
+      snapshotting on the receiving end.
+    </P
+><P
+>      So, if after all that, you still want to try it, set the
+      org.complete.simplesnap:createbookmarks property to on for any dataset
+      for which you'd like to use bookmarks.
+    </P
+></DIV
+><DIV
+CLASS="REFSECT1"
+><A
+NAME="AEN193"
 ></A
 ><H2
 >Options</H2
@@ -936,7 +990,7 @@ CLASS="FILENAME"
 ><DIV
 CLASS="REFSECT1"
 ><A
-NAME="AEN261"
+NAME="AEN274"
 ></A
 ><H2
 >Backup Interrogation</H2
@@ -951,7 +1005,7 @@ CLASS="APPLICATION"
 ><DIV
 CLASS="REFSECT2"
 ><A
-NAME="AEN265"
+NAME="AEN278"
 ></A
 ><H3
 >Space used per host</H3
@@ -995,7 +1049,7 @@ CLASS="PARAMETER"
 ><DIV
 CLASS="REFSECT2"
 ><A
-NAME="AEN275"
+NAME="AEN288"
 ></A
 ><H3
 >Space used by a host</H3
@@ -1082,7 +1136,7 @@ NAME                         AVAIL   USED  USEDSNAP  USEDDS  USEDCHILD
 ><DIV
 CLASS="REFSECT2"
 ><A
-NAME="AEN287"
+NAME="AEN300"
 ></A
 ><H3
 >Viewing snapshots of a dataset</H3
@@ -1133,7 +1187,7 @@ NAME                                              USED  AVAIL  REFER
 ><DIV
 CLASS="REFSECT2"
 ><A
-NAME="AEN294"
+NAME="AEN307"
 ></A
 ><H3
 >Finding what changed over time</H3
@@ -1188,14 +1242,14 @@ R	/tank/store/host2/rpool/host2-1/var/cache/apt/pkgcache.bin.KdsMLu -&#62; /tank
 ><DIV
 CLASS="REFSECT1"
 ><A
-NAME="AEN302"
+NAME="AEN315"
 ></A
 ><H2
 >Warnings, Cautions, and Good Practices</H2
 ><DIV
 CLASS="REFSECT2"
 ><A
-NAME="AEN304"
+NAME="AEN317"
 ></A
 ><H3
 >Importance of Testing</H3
@@ -1213,7 +1267,7 @@ CLASS="APPLICATION"
 ><DIV
 CLASS="REFSECT2"
 ><A
-NAME="AEN308"
+NAME="AEN321"
 ></A
 ><H3
 >Use of zfs receive -F</H3
@@ -1238,7 +1292,7 @@ CLASS="APPLICATION"
 ><DIV
 CLASS="REFSECT2"
 ><A
-NAME="AEN314"
+NAME="AEN327"
 ></A
 ><H3
 >Extraneous Snapshot Buildup</H3
@@ -1264,14 +1318,14 @@ CLASS="COMMAND"
 >zfs
         destroy</B
 > as well, but this must be carefully tuned to
-        local requirements, so an example of doign that is
+        local requirements, so an example of doing that is
         intentionally not supplied with the distribution.
       </P
 ></DIV
 ><DIV
 CLASS="REFSECT2"
 ><A
-NAME="AEN321"
+NAME="AEN334"
 ></A
 ><H3
 >Internal simplesnap snapshots</H3
@@ -1295,7 +1349,7 @@ CLASS="REPLACEABLE"
 ><DIV
 CLASS="REFSECT1"
 ><A
-NAME="AEN326"
+NAME="AEN339"
 ></A
 ><H2
 >Bugs</H2
@@ -1348,7 +1402,7 @@ CLASS="COMMAND"
 ><DIV
 CLASS="REFSECT1"
 ><A
-NAME="AEN337"
+NAME="AEN350"
 ></A
 ><H2
 >See Also</H2
@@ -1387,7 +1441,7 @@ TARGET="_top"
 ><DIV
 CLASS="REFSECT1"
 ><A
-NAME="AEN348"
+NAME="AEN361"
 ></A
 ><H2
 >AUTHOR</H2
@@ -1409,6 +1463,16 @@ CLASS="ACRONYM"
       complete text of the GNU General Public License is included in
       the file COPYING in the source distribution.
     </P
+><P
+>&#13;  THERE IS NO WARRANTY FOR THE PROGRAM, TO THE EXTENT PERMITTED BY
+APPLICABLE LAW.  EXCEPT WHEN OTHERWISE STATED IN WRITING THE COPYRIGHT
+HOLDERS AND/OR OTHER PARTIES PROVIDE THE PROGRAM "AS IS" WITHOUT WARRANTY
+OF ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING, BUT NOT LIMITED TO,
+THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+PURPOSE.  THE ENTIRE RISK AS TO THE QUALITY AND PERFORMANCE OF THE PROGRAM
+IS WITH YOU.  SHOULD THE PROGRAM PROVE DEFECTIVE, YOU ASSUME THE COST OF
+ALL NECESSARY SERVICING, REPAIR OR CORRECTION.
+  </P
 ></DIV
 ></BODY
 ></HTML

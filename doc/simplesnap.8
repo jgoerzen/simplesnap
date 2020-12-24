@@ -3,7 +3,7 @@
 .\" <http://shell.ipoline.com/~elmert/comp/docbook2X/> 
 .\" Please send any bug reports, improvements, comments, patches, 
 .\" etc. to Steve Cheng <steve@ggi-project.org>.
-.TH "SIMPLESNAP" "8" "10 October 2017" "" ""
+.TH "SIMPLESNAP" "8" "24 December 2020" "" ""
 
 .SH NAME
 simplesnap \- Simple and powerful way to send ZFS snapshots across a    network
@@ -40,14 +40,14 @@ configuration file needed.  One ZFS property is available to
 exclude datasets/filesystems.  ZFS datasets are automatically
 discovered on machines being backed up.
 .PP
-\fBsimplesnap\fR is \fBSAFE\fR; it is robust in the
-face of interrupted transfers, and needs little help to keep
+\fBsimplesnap\fR is designed to maximize \fBSAFETY\fR; it is
+robust in the face of interrupted transfers, and needs little help to keep
 running.
 .PP
-\fBsimplesnap\fR is \fBSECURE\fR; unlike many similar
-tools, it does not require full root access to the machines
-being backed up.  It runs only a small wrapper as root, and the
-wrapper has only three commands it implements.
+\fBsimplesnap\fR is designed to maximize \fBSECURITY\fR; unlike
+many similar tools, it does not require full root access to the machines
+being backed up.  It runs only a small wrapper as root, and the wrapper
+has only three commands it implements.
 .SS "FEATURE LIST"
 .PP
 Besides the above, \fBsimplesnap\fR:
@@ -69,6 +69,11 @@ a locked-down authorized_keys file.
 Creates minimal snapshots for its own internal purposes, generally
 leaving no more than 1 or 2 per dataset, and reaps them
 automatically without touching others.
+.TP 0.2i
+\(bu
+Optionally supports ZFS bookmarks, preventing
+backup-related snapshots from consuming space on the
+system being backed up.
 .TP 0.2i
 \(bu
 Is a small program, easily audited.  In fact, most of the code is devoted to sanity-checking, security, and error
@@ -244,6 +249,29 @@ same machine, or having two sets of backup media and rotating them to
 offsite storage.  In these situations, you will have to keep different
 snapshots on the activehost for the different backups, since they will
 be current to different points in time.
+.SH "ADVANCED: ZFS BOOKMARKS"
+.PP
+\fBsimplesnap\fR implements a fairly typical ZFS incremental backup
+strategy.  Newer versions of ZFS support bookmarks.  Bookmarks
+consume no space on the server, while snapshots keep their space held.
+.PP
+In practice, this is generally not a problem for backups, since
+snapshots are frequently transferred and old ones removed.  In some
+infrequent backup situations, it may be a larger issue, and for those
+situations, \fBsimplesnap\fR supports bookmarks.
+.PP
+Please note, however, that bookmark support in \fBsimplesnap\fR is not
+well-used or well-tested; please verify proper operation on non-production
+data before attempting to use it for anything important.
+.PP
+One caveat with bookmarks is that zfs send -I is not supported with them;
+instead, \fBsimplesnap\fR has to fall back to zfs send -i.  This causes the
+intermediate snapshots to not be transferred.  You can work around this by
+snapshotting on the receiving end.
+.PP
+So, if after all that, you still want to try it, set the
+org.complete.simplesnap:createbookmarks property to on for any dataset
+for which you'd like to use bookmarks.
 .SH "OPTIONS"
 .PP
 All \fBsimplesnap\fR options begin with two dashes (`--').  Most take
@@ -544,7 +572,7 @@ at the end of the
 included with \fBsimplesnap\fR is one way to check for these.
 They could automatically be reaped with \fBzfs
 destroy\fR as well, but this must be carefully tuned to
-local requirements, so an example of doign that is
+local requirements, so an example of doing that is
 intentionally not supplied with the distribution.
 .SS "INTERNAL SIMPLESNAP SNAPSHOTS"
 .PP
@@ -597,3 +625,12 @@ the terms of the GNU General Public License, Version 3 any
 later version published by the Free Software Foundation.  The
 complete text of the GNU General Public License is included in
 the file COPYING in the source distribution.
+.PP
+THERE IS NO WARRANTY FOR THE PROGRAM, TO THE EXTENT PERMITTED BY
+APPLICABLE LAW.  EXCEPT WHEN OTHERWISE STATED IN WRITING THE COPYRIGHT
+HOLDERS AND/OR OTHER PARTIES PROVIDE THE PROGRAM "AS IS" WITHOUT WARRANTY
+OF ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING, BUT NOT LIMITED TO,
+THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+PURPOSE.  THE ENTIRE RISK AS TO THE QUALITY AND PERFORMANCE OF THE PROGRAM
+IS WITH YOU.  SHOULD THE PROGRAM PROVE DEFECTIVE, YOU ASSUME THE COST OF
+ALL NECESSARY SERVICING, REPAIR OR CORRECTION.
