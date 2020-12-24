@@ -20,17 +20,17 @@ set -e
 
 # Log a message
 logit () {
-   logger -p info -t "`basename $0`[$$]" "$1"
+   logger -p info -t "`basename "$0"`[$$]" "$1"
 }
 
 # Log an error message
 logerror () {
-   logger -p err -t "`basename $0`[$$]" "$1"
+   logger -p err -t "`basename "$0"`[$$]" "$1"
 }
 
 # Log stdin with the given code.  Used normally to log stderr.
 logstdin () {
-   logger -p info -t "`basename $0`[$$/$1]"
+   logger -p info -t "`basename "$0"`[$$/$1]"
 }
 
 # Run command, logging stderr and exit code
@@ -299,8 +299,7 @@ reaponlybackups () {
 
     reap "${REAPDS}"
   done
-fi
-
+}
 
 if [ -n "$REAPONLYMODE" ]; then
   # Reap only.
