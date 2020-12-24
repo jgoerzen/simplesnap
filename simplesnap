@@ -95,7 +95,10 @@ Optional:
            --host.  The parameter is in the format given to date/gdate: 
            for instance, --check "30 days ago".  Remember to enclose it
            in quotes if it contains spaces.
-  
+  --noreap: Disable the automatic post-receive reap of old
+            simplesnap snapshots on the destination.
+  --reaponly: Do not back up, but perform the reap operation on existing
+              backups.
 EOF
   exiterror "Syntax error: $1"
 }
@@ -145,6 +148,14 @@ while [ -n "$1" ]; do
       ;;
     "--local")
       LOCALMODE="on"
+      shift
+      ;;
+    "--noreap")
+      NOREAPMODE="on"
+      shift
+      ;;
+    "--reaponly")
+      REAPONLYMODE="on"
       shift
       ;;
     *)
@@ -263,19 +274,45 @@ fi
 
 reap () {
   DATASET="$1"
-       # We always save the most recent.
-       SNAPSTOREMOVE="`listsnaps \"${TEMPLATE}\" \"${DATASET}\" | $HEAD -n -1`"
-       if [ -z "${SNAPSTOREMOVE}" ]; then
-         logit "No snapshots to remove."
-       else
-         for REMOVAL in ${SNAPSTOREMOVE}; do
-            logit "Destroying snapshot ${REMOVAL}"
-            echo "_${REMOVAL}" | $GREP -q '@' || exiterror "PANIC: snapshot name doesn not contain @"
-            runzfs destroy "${REMOVAL}"
-         done
-       fi
+  # We always save the most recent.
+  SNAPSTOREMOVE="`listsnaps \"${TEMPLATE}\" \"${DATASET}\" | $HEAD -n -1`"
+  if [ -z "${SNAPSTOREMOVE}" ]; then
+      logit "No snapshots to remove."
+  else
+      for REMOVAL in ${SNAPSTOREMOVE}; do
+        logit "Destroying snapshot ${REMOVAL}"
+        echo "_${REMOVAL}" | $GREP -q '@' || exiterror "PANIC: snapshot name doesn not contain @"
+        runzfs destroy "${REMOVAL}"
+      done
+  fi
 }
-  
+
+reaponlybackups () {
+   REAPHOST="$1"
+
+  DATASETS="`runzfs list -t filesystem,volume -o name -H -r \"${STORE}/${REAPHOST}\"`"
+  for REAPDS in ${DATASETS}; do
+    # Don't reap the top-level host dataset itself.
+    if [ "${REAPDS}" = "${STORE}/${CHECKHOST}" ]; then
+        continue
+    fi
+
+    reap "${REAPDS}"
+  done
+fi
+
+
+if [ -n "$REAPONLYMODE" ]; then
+  # Reap only.
+  if [ -n "$HOST" ]; then
+    reaponlybackups "$HOST"
+  else
+    for HOST in *; do reaponlybackups "$HOST"; done
+  fi
+  logit "reaponly: done"
+  exit 0
+fi
+
 
 backupto() {
     DATASET="$1"
@@ -300,7 +337,9 @@ backupto() {
 
         logit "Received backup into ${DESTDIR}"
         runwrap reap "${SETNAME}" "${DATASET}"
-        reap "${DESTDIR}"
+        if [ "$NOREAPMODE" != "on" ]; then
+            reap "${DESTDIR}"
+        fi
     else
         logerror "zfs receive died with error: $?"
         exit 100

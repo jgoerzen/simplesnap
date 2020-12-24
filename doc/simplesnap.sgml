@@ -67,6 +67,7 @@ manpage.1: manpage.sgml
       <arg choice="opt"><option>--wrapcmd</option> <replaceable>COMMAND</replaceable></arg>
       <arg choice="opt"><option>--receivecmd</option> <replaceable>COMMAND</replaceable></arg>
       <arg choice="opt"><option>--local</option></arg>
+      <arg choice="opt"><option>--noreap</option></arg>
       <arg choice="opt"><option>--backupdataset</option>
         <replaceable>DATASET</replaceable>
         <arg choice="opt"><option>--datasetdest</option> <replaceable>DEST</replaceable></arg></arg>
@@ -79,6 +80,15 @@ manpage.1: manpage.sgml
     <cmdsynopsis>
       <command>&dhpackage;</command>
       <arg choice="plain"><option>--check</option> <replaceable>TIMEFRAME</replaceable></arg>
+      <arg choice="plain"><option>--store</option> <replaceable>STORE</replaceable></arg>
+      <arg choice="plain"><option>--setname</option>
+        <replaceable>NAME</replaceable></arg>
+      <arg choice="opt"><option>--host</option>
+      <replaceable>HOST</replaceable></arg>
+    </cmdsynopsis>
+    <cmdsynopsis>
+      <command>&dhpackage;</command>
+      <arg choice="plain"><option>--reaponly</option></arg>
       <arg choice="plain"><option>--store</option> <replaceable>STORE</replaceable></arg>
       <arg choice="plain"><option>--setname</option>
         <replaceable>NAME</replaceable></arg>
@@ -367,6 +377,13 @@ no-port-forwarding,no-X11-forwarding,no-pty ssh-rsa AAAA....
     <para>
       (If that gives an error, use compression=on instead.)
     </para>
+    <para>
+      I also recommend disabling the creation of /dev/zvol entries
+      for backed-up filesystems, so:
+    </para>
+    <para>
+      <command>zfs set volmode=none tank/simplesnap</command>
+    </para>
 
     <para>
       Now, you can run the backup:
@@ -500,6 +517,16 @@ no-port-forwarding,no-X11-forwarding,no-pty ssh-rsa AAAA....
       </varlistentry>
 
       <varlistentry>
+        <term><option>--reaponly</option>
+          <listitem><para>
+            Do not back up, but perform the reap of old &simplesnap;-generated
+            snapshots on the local end.  Only useful if --noreap is in use for
+            backups.
+          </para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
         <term><option>--datasetdest
         <replaceable>DEST</replaceable></option>
           <listitem><para>
@@ -537,6 +564,17 @@ no-port-forwarding,no-X11-forwarding,no-pty ssh-rsa AAAA....
             give <option>--sshcmd</option> in this case.  For
             instance: <command>simplesnap --local --store
                 /bakfs/simplesnap --host server1 --setname bak1</command>
+          </para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><option>--noreap</option>
+          <listitem><para>
+              Skips the usual reaping of old &simplesnap;-generated snapshots
+              on the destination after a successful receive.  Useful when the
+              destination is not actually ZFS, or in conjunction with a later
+              --reaponly.
           </para>
         </listitem>
       </varlistentry>
