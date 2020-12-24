@@ -576,6 +576,11 @@ no-port-forwarding,no-X11-forwarding,no-pty ssh-rsa AAAA....
               destination is not actually ZFS, or in conjunction with a later
               --reaponly.
           </para>
+          <para>
+            This has no impact on the reaping of old &simplesnap;-generated
+            snapshots on the host being backed up; that reaping will continue as
+            usual.
+          </para>
         </listitem>
       </varlistentry>
 
