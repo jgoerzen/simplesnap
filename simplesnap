@@ -2,7 +2,7 @@
 
 # Simple snapshot manager
 
-# Copyright (c) 2014-2017 John Goerzen
+# Copyright (c) 2014-2020 John Goerzen
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
 #   the Free Software Foundation, either version 3 of the License, or
@@ -57,7 +57,8 @@ syntaxerror () {
    cat <<EOF
 Syntax: 
 
-$0 [--sshcmd CMD] [--local] [--wrapcmd CMD] 
+$0 [--sshcmd CMD] [--local] [--wrapcmd CMD]
+   [--receivecmd CMD]
    [--backupdataset DATASET [--datasetdest DEST]] 
    --store STORE --setname NAME --host HOST
 
@@ -82,6 +83,8 @@ Optional:
              (or local machine, if --local is present).
              Not usually relevant, since this is set in
              ~/.ssh/authorized_keys.  Default: "simplesnapwrap"
+  --receivecmd: Gives the command to use to receive the ZFS data.  Default:
+             --receivecmd "/zbin/zfs receive -F -x mountpoint"
   --local: The host is localhost; do not use remote tool to access it.
   --backupdataset: Back up only the specified dataset instead of all.
   --datasetdest: Valid only with --backupdataset; store the backup in
@@ -103,6 +106,10 @@ while [ -n "$1" ]; do
   case "$1" in
     "--sshcmd")
       SSHCMD="$2"
+      shift 2
+      ;;
+    "--receivecmd")
+      RECEIVECMD="$2"
       shift 2
       ;;
     "--wrapcmd")
@@ -147,6 +154,7 @@ while [ -n "$1" ]; do
 done
 
 SSHCMD="${SSHCMD:-ssh}"
+RECEIVECMD="${RECEIVECMD:-/sbin/zfs receive -F -x mountpoint}"
 WRAPCMD="${WRAPCMD:-simplesnapwrap}"
 
 command -v gdate > /dev/null && DATE="gdate" || DATE="date"
@@ -160,6 +168,7 @@ command -v dotlockfile > /dev/null && LOCKMETHOD="dotlockfile" || LOCKMETHOD="mk
 [ -n "$STORE" ] || syntaxerror "Missing --store"
 [ -n "$SETNAME" ] || syntaxerror "Missing --setname"
 [ -n "$CHECKMODE" -o -n "$HOST" ] || syntaxerror "Missing --host"
+[ -n "$RECEIVECMD" ] || syntaxerror "Invalid receive command: $RECEIVECMD"
 
 echo "_${STORE}" | $GREP -qv " " || syntaxerror "Space in --store: ${STORE}"
 if [ -n "${DATASETDEST}" ]; then
@@ -287,7 +296,7 @@ backupto() {
     fi
 
     if runwrap sendback "${SETNAME}" "${DATASET}" | \
-       runzfs receive -F "${DESTDIR}"; then
+        runcommand ${RECEIVECMD} "${DESTDIR}"; then
 
         logit "Received backup into ${DESTDIR}"
         runwrap reap "${SETNAME}" "${DATASET}"

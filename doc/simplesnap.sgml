@@ -65,6 +65,7 @@ manpage.1: manpage.sgml
       <arg choice="opt"><option>--sshcmd</option>
         <replaceable>COMMAND</replaceable></arg>
       <arg choice="opt"><option>--wrapcmd</option> <replaceable>COMMAND</replaceable></arg>
+      <arg choice="opt"><option>--receivecmd</option> <replaceable>COMMAND</replaceable></arg>
       <arg choice="opt"><option>--local</option></arg>
       <arg choice="opt"><option>--backupdataset</option>
         <replaceable>DATASET</replaceable>
@@ -547,11 +548,29 @@ no-port-forwarding,no-X11-forwarding,no-pty ssh-rsa AAAA....
             Gives the command to use to connect to the remote host.
             Defaults to "ssh".  It may be used to select an
             alternative configuration file or keypair.  Remember to
-            quote it per your shell if it contains spaces.  For example: 
+            quote it per your shell if it contains spaces.  For example:
             --sshcmd "ssh -i /root/.id_rsa_simplesnap".  This command
             is ignored when <option>--local</option> or
             <option>--check</option> is given.
           </para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><option>--receivecmd
+            <replaceable>COMMAND</replaceable></option>
+          <listitem><para>
+              Gives the command to use to receive a ZFS dataset; defaults to
+              "/sbin/zfs receive -F -x mountpoint", which destroys any
+              local changes (due to the -F) and prevents remote backups from
+              dictating local mointpoints (thanks to the -x).
+            </para>
+            <para>
+              This command does not have to actually be zfs; for instance,
+              in certain situations, it may be valuable to queue the data
+              or save it off in a file for use on a non-ZFS target.  In those
+              cases, --noreap should also be given.
+            </para>
         </listitem>
       </varlistentry>
 
