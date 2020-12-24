@@ -246,32 +246,6 @@ if [ -n "$CHECKMODE" ]; then
   exit $CHECKRETVAL
 fi
 
-runwrap () {
-  if [ "$LOCALMODE" = "on" ]; then
-    runcommand "${WRAPCMD}" reinvoked simplesnapwrap "$@"
-  else
-    runcommand ${SSHCMD} ${HOST} ${WRAPCMD} "$@"
-  fi
-}
-
-if [ ! -d "${MOUNTPOINT}/${HOST}" ]; then
-  runzfs create "${STORE}/${HOST}"
-fi
-
-LOCKFILE="${MOUNTPOINT}/${HOST}/.lock"
-printf -v EVAL_SAFE_LOCKFILE '%q' "$LOCKFILE"
-
-if [ x"$LOCKMETHOD" = x"dotlockfile" ] && ${LOCKMETHOD} -r 0 -l -p "${LOCKFILE}" ; then
-  logit "Lock obtained at ${LOCKFILE} with dotlockfile"
-  trap 'ECODE=$?; dotlockfile -u '"${EVAL_SAFE_LOCKFILE}"'; exit $ECODE' EXIT INT TERM
-elif [ x"$LOCKMETHOD" = x"mkdir" ]; then
-    ${LOCKMETHOD} "${LOCKFILE}" || exiterror "Could not obtain lock at ${LOCKFILE}; if $0 is not already running, rmdir that path."
-    logit "Lock obtained at ${LOCKFILE} with mkdir"
-    trap 'ECODE=$?; rmdir '"${EVAL_SAFE_LOCKFILE}"'; exit $ECODE' EXIT INT TERM
-else
-    exiterror "Could not obtain lock at ${LOCKFILE}; $0 likely already running."
-fi
-
 reap () {
   DATASET="$1"
   # We always save the most recent.
@@ -311,6 +285,33 @@ if [ -n "$REAPONLYMODE" ]; then
   logit "reaponly: done"
   exit 0
 fi
+
+runwrap () {
+  if [ "$LOCALMODE" = "on" ]; then
+    runcommand "${WRAPCMD}" reinvoked simplesnapwrap "$@"
+  else
+    runcommand ${SSHCMD} ${HOST} ${WRAPCMD} "$@"
+  fi
+}
+
+if [ ! -d "${MOUNTPOINT}/${HOST}" ]; then
+  runzfs create "${STORE}/${HOST}"
+fi
+
+LOCKFILE="${MOUNTPOINT}/${HOST}/.lock"
+printf -v EVAL_SAFE_LOCKFILE '%q' "$LOCKFILE"
+
+if [ x"$LOCKMETHOD" = x"dotlockfile" ] && ${LOCKMETHOD} -r 0 -l -p "${LOCKFILE}" ; then
+  logit "Lock obtained at ${LOCKFILE} with dotlockfile"
+  trap 'ECODE=$?; dotlockfile -u '"${EVAL_SAFE_LOCKFILE}"'; exit $ECODE' EXIT INT TERM
+elif [ x"$LOCKMETHOD" = x"mkdir" ]; then
+    ${LOCKMETHOD} "${LOCKFILE}" || exiterror "Could not obtain lock at ${LOCKFILE}; if $0 is not already running, rmdir that path."
+    logit "Lock obtained at ${LOCKFILE} with mkdir"
+    trap 'ECODE=$?; rmdir '"${EVAL_SAFE_LOCKFILE}"'; exit $ECODE' EXIT INT TERM
+else
+    exiterror "Could not obtain lock at ${LOCKFILE}; $0 likely already running."
+fi
+
 
 
 backupto() {
