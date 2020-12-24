@@ -44,7 +44,7 @@ manpage.1: manpage.sgml
       &dhsurname;
     </author>
     <copyright>
-      <year>2014-2017</year>
+      <year>2014-2020</year>
       <holder>&dhusername;</holder>
     </copyright>
   </refentryinfo>
@@ -114,16 +114,16 @@ manpage.1: manpage.sgml
     </para>
 
     <para>
-      &simplesnap; is <emphasis>SAFE</emphasis>; it is robust in the
-      face of interrupted transfers, and needs little help to keep
+      &simplesnap; is designed to maximize <emphasis>SAFETY</emphasis>; it is
+      robust in the face of interrupted transfers, and needs little help to keep
       running.
     </para>
 
     <para>
-      &simplesnap; is <emphasis>SECURE</emphasis>; unlike many similar
-      tools, it does not require full root access to the machines
-      being backed up.  It runs only a small wrapper as root, and the
-      wrapper has only three commands it implements.
+      &simplesnap; is designed to maximize <emphasis>SECURITY</emphasis>; unlike
+      many similar tools, it does not require full root access to the machines
+      being backed up.  It runs only a small wrapper as root, and the wrapper
+      has only three commands it implements.
     </para>
 
     <refsect2>
@@ -417,7 +417,35 @@ no-port-forwarding,no-X11-forwarding,no-pty ssh-rsa AAAA....
     <title>Advanced: ZFS bookmarks</title>
     <para>
       &simplesnap; implements a fairly typical ZFS incremental backup
-      strategy.   
+      strategy.  Newer versions of ZFS support bookmarks.  Bookmarks
+      consume no space on the server, while snapshots keep their space held.
+    </para>
+
+    <para>
+      In practice, this is generally not a problem for backups, since
+      snapshots are frequently transferred and old ones removed.  In some
+      infrequent backup situations, it may be a larger issue, and for those
+      situations, &simplesnap; supports bookmarks.
+    </para>
+
+    <para>
+      Please note, however, that bookmark support in &simplesnap; is not
+      well-used or well-tested; please verify proper operation on non-production
+      data before attempting to use it for anything important.
+    </para>
+
+    <para>
+      One caveat with bookmarks is that zfs send -I is not supported with them;
+      instead, &simplesnap; has to fall back to zfs send -i.  This causes the
+      intermediate snapshots to not be transferred.  You can work around this by
+      snapshotting on the receiving end.
+    </para>
+
+    <para>
+      So, if after all that, you still want to try it, set the
+      org.complete.simplesnap:createbookmarks property to on for any dataset
+      for which you'd like to use bookmarks.
+    </para>
 
   <refsect1>
     <title>Options</title>
@@ -885,6 +913,18 @@ R	/tank/store/host2/rpool/host2-1/var/cache/apt/pkgcache.bin.KdsMLu -> /tank/sto
       complete text of the GNU General Public License is included in
       the file COPYING in the source distribution.
     </para>
+
+    <para>
+
+  THERE IS NO WARRANTY FOR THE PROGRAM, TO THE EXTENT PERMITTED BY
+APPLICABLE LAW.  EXCEPT WHEN OTHERWISE STATED IN WRITING THE COPYRIGHT
+HOLDERS AND/OR OTHER PARTIES PROVIDE THE PROGRAM "AS IS" WITHOUT WARRANTY
+OF ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING, BUT NOT LIMITED TO,
+THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+PURPOSE.  THE ENTIRE RISK AS TO THE QUALITY AND PERFORMANCE OF THE PROGRAM
+IS WITH YOU.  SHOULD THE PROGRAM PROVE DEFECTIVE, YOU ASSUME THE COST OF
+ALL NECESSARY SERVICING, REPAIR OR CORRECTION.
+  </para>
   </refsect1>
 </refentry>
 
