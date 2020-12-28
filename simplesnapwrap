@@ -101,16 +101,15 @@ if [ "$1" = "reinvoked" ]; then
        OLDESTSNAP="`listsnaps \"${TEMPLATE}\" \"${DATASET}\" | head -n 1`"
        if [ -z "${OLDESTSNAP}" ]; then
          logit "Found no existing snapshot, looking for a bookmark."
+         OLDESTSNAP="`listbookmarks \"${TEMPLATE}\" \"${DATASET}\" | head -n 1`"
+         if [ -z "${OLDESTSNAP}" ]; then
+           logit "Found no existing bookmark either; will send full stream."
+         else
+           USINGBOOKMARK=1
+           logit "Will use bookmark ${OLDESTSNAP} as basis."
+         fi
        else
          logit "Will use ${OLDESTSNAP} as basis."
-       fi
-
-       OLDESTSNAP="`listbookmarks \"${TEMPLATE}\" \"${DATASET}\" | head -n 1`"
-       if [ -z "${OLDESTSNAP}" ]; then
-         logit "Found no existing bookmark either; will send full stream."
-       else
-         USINGBOOKMARK=1
-         logit "Will use bookmark ${OLDESTSNAP} as basis."
        fi
 
        # Make a new snapshot.
@@ -135,7 +134,7 @@ if [ "$1" = "reinvoked" ]; then
          fi
        fi
 
-       if $ZFS get -o value -H "${BOOKMARKPROP}" bakfs | grep -q "on"; then
+       if $ZFS get -o value -H "${BOOKMARKPROP}" "${DATASET}" | grep -q "on"; then
            NEWBM="`echo "${NEWFULLSNAP}" | sed 's/@/#/'`"
            logit "${BOOKMARKPROP}=on; converting snapshot ${NEWFULLSNAP} to bookmark ${NEWBM}"
            $ZFS bookmark "${NEWFULLSNAP}" "${NEWBM}"
