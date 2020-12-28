@@ -1,8 +1,13 @@
-simplesnap (1.0.5) UNRELEASED; urgency=medium
+simplesnap (2.0.0) unstable; urgency=medium
 
+  [ Henrik Riomar ]
   * fix: simplesnap: line 2??: dotlockfile: command not found (Closes: #12)
 
- -- Henrik Riomar <henrik.riomar@gmail.com>  Sat, 24 Nov 2018 18:51:58 -0600
+  [ John Goerzen ]
+  * Add support for running with non-ZFS destination
+  * Add alpha-quality support for using bookmarks instead of snapshots
+
+ -- John Goerzen <jgoerzen@complete.org>  Mon, 28 Dec 2020 15:11:18 -0600
 
 simplesnap (1.0.4) unstable; urgency=low
 
