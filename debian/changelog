@@ -1,7 +1,7 @@
-simplesnap (2.0.0) unstable; urgency=medium
+simplesnap (2.0.0) unstable; urgency=low
 
   [ Henrik Riomar ]
-  * fix: simplesnap: line 2??: dotlockfile: command not found (Closes: #12)
+  * fix: simplesnap: make dotlockfile optional
 
   [ John Goerzen ]
   * Add support for running with non-ZFS destination
