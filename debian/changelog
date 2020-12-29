@@ -1,3 +1,9 @@
+simplesnap (2.0.1) unstable; urgency=medium
+
+  * Ack NMU; Closes: #884288.
+
+ -- John Goerzen <jgoerzen@complete.org>  Tue, 29 Dec 2020 08:46:43 -0600
+
 simplesnap (2.0.0) unstable; urgency=low
 
   [ Henrik Riomar ]
@@ -8,6 +14,14 @@ simplesnap (2.0.0) unstable; urgency=low
   * Add alpha-quality support for using bookmarks instead of snapshots
 
  -- John Goerzen <jgoerzen@complete.org>  Mon, 28 Dec 2020 15:11:18 -0600
+
+simplesnap (1.0.4+nmu1) unstable; urgency=medium
+
+  * Non-maintainer upload.
+  * Correct the order of dependencies to list
+    zfs-fuse (in main) first. (Closes: #884288)
+
+ -- Adrian Bunk <bunk@debian.org>  Wed, 10 Jan 2018 15:09:28 +0200
 
 simplesnap (1.0.4) unstable; urgency=low
 
