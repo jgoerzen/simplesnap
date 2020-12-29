@@ -57,7 +57,18 @@ CLASS="REPLACEABLE"
 ></TT
 >] [<CODE
 CLASS="OPTION"
+>--receivecmd</CODE
+> <TT
+CLASS="REPLACEABLE"
+><I
+>COMMAND</I
+></TT
+>] [<CODE
+CLASS="OPTION"
 >--local</CODE
+>] [<CODE
+CLASS="OPTION"
+>--noreap</CODE
 >] [<CODE
 CLASS="OPTION"
 >--backupdataset</CODE
@@ -142,11 +153,45 @@ CLASS="REPLACEABLE"
 >HOST</I
 ></TT
 >]</P
+><P
+><B
+CLASS="COMMAND"
+>simplesnap</B
+>   <CODE
+CLASS="OPTION"
+>--reaponly</CODE
+>   <CODE
+CLASS="OPTION"
+>--store</CODE
+> <TT
+CLASS="REPLACEABLE"
+><I
+>STORE</I
+></TT
+>   <CODE
+CLASS="OPTION"
+>--setname</CODE
+>
+        <TT
+CLASS="REPLACEABLE"
+><I
+>NAME</I
+></TT
+>  [<CODE
+CLASS="OPTION"
+>--host</CODE
+>
+      <TT
+CLASS="REPLACEABLE"
+><I
+>HOST</I
+></TT
+>]</P
 ></DIV
 ><DIV
 CLASS="REFSECT1"
 ><A
-NAME="AEN57"
+NAME="AEN75"
 ></A
 ><H2
 >Description</H2
@@ -223,7 +268,7 @@ CLASS="EMPHASIS"
 ><DIV
 CLASS="REFSECT2"
 ><A
-NAME="AEN73"
+NAME="AEN91"
 ></A
 ><H3
 >Feature List</H3
@@ -297,7 +342,7 @@ CLASS="APPLICATION"
 ><DIV
 CLASS="REFSECT2"
 ><A
-NAME="AEN94"
+NAME="AEN112"
 ></A
 ><H3
 >Method of Operation</H3
@@ -438,7 +483,7 @@ CLASS="COMMAND"
 ><DIV
 CLASS="REFSECT1"
 ><A
-NAME="AEN127"
+NAME="AEN145"
 ></A
 ><H2
 >Quick Start</H2
@@ -585,6 +630,16 @@ CLASS="COMMAND"
 >      (If that gives an error, use compression=on instead.)
     </P
 ><P
+>      I also recommend disabling the creation of /dev/zvol entries
+      for backed-up filesystems, so:
+    </P
+><P
+>      <B
+CLASS="COMMAND"
+>zfs set volmode=none tank/simplesnap</B
+>
+    </P
+><P
 >      Now, you can run the backup:
     </P
 ><P
@@ -625,7 +680,7 @@ CLASS="REPLACEABLE"
 ><DIV
 CLASS="REFSECT1"
 ><A
-NAME="AEN176"
+NAME="AEN197"
 ></A
 ><H2
 >Advanced: SETNAME usage</H2
@@ -657,7 +712,7 @@ CLASS="REPLACEABLE"
 ><DIV
 CLASS="REFSECT1"
 ><A
-NAME="AEN182"
+NAME="AEN203"
 ></A
 ><H2
 >Advanced: ZFS bookmarks</H2
@@ -704,7 +759,7 @@ CLASS="APPLICATION"
 ><DIV
 CLASS="REFSECT1"
 ><A
-NAME="AEN193"
+NAME="AEN214"
 ></A
 ><H2
 >Options</H2
@@ -812,6 +867,21 @@ CLASS="APPLICATION"
 ><DT
 ><CODE
 CLASS="OPTION"
+>--reaponly</CODE
+></DT
+><DD
+><P
+>            Do not back up, but perform the reap of old <SPAN
+CLASS="APPLICATION"
+>simplesnap</SPAN
+>-generated
+            snapshots on the local end.  Only useful if --noreap is in use for
+            backups.
+          </P
+></DD
+><DT
+><CODE
+CLASS="OPTION"
 >--datasetdest
         <TT
 CLASS="REPLACEABLE"
@@ -892,6 +962,30 @@ CLASS="COMMAND"
 ><DT
 ><CODE
 CLASS="OPTION"
+>--noreap</CODE
+></DT
+><DD
+><P
+>              Skips the usual reaping of old <SPAN
+CLASS="APPLICATION"
+>simplesnap</SPAN
+>-generated snapshots
+              on the destination after a successful receive.  Useful when the
+              destination is not actually ZFS, or in conjunction with a later
+              --reaponly.
+          </P
+><P
+>            This has no impact on the reaping of old <SPAN
+CLASS="APPLICATION"
+>simplesnap</SPAN
+>-generated
+            snapshots on the host being backed up; that reaping will continue as
+            usual.
+          </P
+></DD
+><DT
+><CODE
+CLASS="OPTION"
 >--sshcmd
             <TT
 CLASS="REPLACEABLE"
@@ -905,7 +999,7 @@ CLASS="REPLACEABLE"
 >            Gives the command to use to connect to the remote host.
             Defaults to "ssh".  It may be used to select an
             alternative configuration file or keypair.  Remember to
-            quote it per your shell if it contains spaces.  For example: 
+            quote it per your shell if it contains spaces.  For example:
             --sshcmd "ssh -i /root/.id_rsa_simplesnap".  This command
             is ignored when <CODE
 CLASS="OPTION"
@@ -916,6 +1010,31 @@ CLASS="OPTION"
 >--check</CODE
 > is given.
           </P
+></DD
+><DT
+><CODE
+CLASS="OPTION"
+>--receivecmd
+            <TT
+CLASS="REPLACEABLE"
+><I
+>COMMAND</I
+></TT
+></CODE
+></DT
+><DD
+><P
+>              Gives the command to use to receive a ZFS dataset; defaults to
+              "/sbin/zfs receive -F -x mountpoint", which destroys any
+              local changes (due to the -F) and prevents remote backups from
+              dictating local mointpoints (thanks to the -x).
+            </P
+><P
+>              This command does not have to actually be zfs; for instance,
+              in certain situations, it may be valuable to queue the data
+              or save it off in a file for use on a non-ZFS target.  In those
+              cases, --noreap should also be given.
+            </P
 ></DD
 ><DT
 ><CODE
@@ -990,7 +1109,7 @@ CLASS="FILENAME"
 ><DIV
 CLASS="REFSECT1"
 ><A
-NAME="AEN274"
+NAME="AEN316"
 ></A
 ><H2
 >Backup Interrogation</H2
@@ -1005,7 +1124,7 @@ CLASS="APPLICATION"
 ><DIV
 CLASS="REFSECT2"
 ><A
-NAME="AEN278"
+NAME="AEN320"
 ></A
 ><H3
 >Space used per host</H3
@@ -1049,7 +1168,7 @@ CLASS="PARAMETER"
 ><DIV
 CLASS="REFSECT2"
 ><A
-NAME="AEN288"
+NAME="AEN330"
 ></A
 ><H3
 >Space used by a host</H3
@@ -1136,7 +1255,7 @@ NAME                         AVAIL   USED  USEDSNAP  USEDDS  USEDCHILD
 ><DIV
 CLASS="REFSECT2"
 ><A
-NAME="AEN300"
+NAME="AEN342"
 ></A
 ><H3
 >Viewing snapshots of a dataset</H3
@@ -1187,7 +1306,7 @@ NAME                                              USED  AVAIL  REFER
 ><DIV
 CLASS="REFSECT2"
 ><A
-NAME="AEN307"
+NAME="AEN349"
 ></A
 ><H3
 >Finding what changed over time</H3
@@ -1242,14 +1361,14 @@ R	/tank/store/host2/rpool/host2-1/var/cache/apt/pkgcache.bin.KdsMLu -&#62; /tank
 ><DIV
 CLASS="REFSECT1"
 ><A
-NAME="AEN315"
+NAME="AEN357"
 ></A
 ><H2
 >Warnings, Cautions, and Good Practices</H2
 ><DIV
 CLASS="REFSECT2"
 ><A
-NAME="AEN317"
+NAME="AEN359"
 ></A
 ><H3
 >Importance of Testing</H3
@@ -1267,7 +1386,7 @@ CLASS="APPLICATION"
 ><DIV
 CLASS="REFSECT2"
 ><A
-NAME="AEN321"
+NAME="AEN363"
 ></A
 ><H3
 >Use of zfs receive -F</H3
@@ -1292,7 +1411,7 @@ CLASS="APPLICATION"
 ><DIV
 CLASS="REFSECT2"
 ><A
-NAME="AEN327"
+NAME="AEN369"
 ></A
 ><H3
 >Extraneous Snapshot Buildup</H3
@@ -1325,7 +1444,7 @@ CLASS="COMMAND"
 ><DIV
 CLASS="REFSECT2"
 ><A
-NAME="AEN334"
+NAME="AEN376"
 ></A
 ><H3
 >Internal simplesnap snapshots</H3
@@ -1349,7 +1468,7 @@ CLASS="REPLACEABLE"
 ><DIV
 CLASS="REFSECT1"
 ><A
-NAME="AEN339"
+NAME="AEN381"
 ></A
 ><H2
 >Bugs</H2
@@ -1402,7 +1521,7 @@ CLASS="COMMAND"
 ><DIV
 CLASS="REFSECT1"
 ><A
-NAME="AEN350"
+NAME="AEN392"
 ></A
 ><H2
 >See Also</H2
@@ -1441,7 +1560,7 @@ TARGET="_top"
 ><DIV
 CLASS="REFSECT1"
 ><A
-NAME="AEN361"
+NAME="AEN403"
 ></A
 ><H2
 >AUTHOR</H2

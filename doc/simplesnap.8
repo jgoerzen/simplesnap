@@ -3,14 +3,14 @@
 .\" <http://shell.ipoline.com/~elmert/comp/docbook2X/> 
 .\" Please send any bug reports, improvements, comments, patches, 
 .\" etc. to Steve Cheng <steve@ggi-project.org>.
-.TH "SIMPLESNAP" "8" "24 December 2020" "" ""
+.TH "SIMPLESNAP" "8" "29 December 2020" "" ""
 
 .SH NAME
 simplesnap \- Simple and powerful way to send ZFS snapshots across a    network
 .SH SYNOPSIS
 
 \fBsimplesnap\fR [ \fB--sshcmd
-\fICOMMAND\fB\fR ] [ \fB--wrapcmd \fICOMMAND\fB\fR ] [ \fB--local\fR ] [ \fB--backupdataset
+\fICOMMAND\fB\fR ] [ \fB--wrapcmd \fICOMMAND\fB\fR ] [ \fB--receivecmd \fICOMMAND\fB\fR ] [ \fB--local\fR ] [ \fB--noreap\fR ] [ \fB--backupdataset
 \fIDATASET\fB
  [ --datasetdest \fIDEST\fB ]\fR ] \fB--store \fISTORE\fB\fR \fB--setname
 \fINAME\fB\fR \fB--host
@@ -18,6 +18,11 @@ simplesnap \- Simple and powerful way to send ZFS snapshots across a    network
 
 
 \fBsimplesnap\fR \fB--check \fITIMEFRAME\fB\fR \fB--store \fISTORE\fB\fR \fB--setname
+\fINAME\fB\fR [ \fB--host
+\fIHOST\fB\fR ]
+
+
+\fBsimplesnap\fR \fB--reaponly\fR \fB--store \fISTORE\fB\fR \fB--setname
 \fINAME\fB\fR [ \fB--host
 \fIHOST\fB\fR ]
 
@@ -219,6 +224,11 @@ I often recommend compression for \fBsimplesnap\fR datasets, so:
 .PP
 (If that gives an error, use compression=on instead.)
 .PP
+I also recommend disabling the creation of /dev/zvol entries
+for backed-up filesystems, so:
+.PP
+\fBzfs set volmode=none tank/simplesnap\fR
+.PP
 Now, you can run the backup:
 .PP
 \fBsimplesnap --host activehost --setname mainset
@@ -307,6 +317,11 @@ instance,
 --check "30 days ago".  Remember to enclose it in quotes
 if it contains spaces.
 .TP
+\fB--reaponly \fR
+Do not back up, but perform the reap of old \fBsimplesnap\fR-generated
+snapshots on the local end.  Only useful if --noreap is in use for
+backups.
+.TP
 \fB--datasetdest \fIDEST\fB \fR
 Valid only with \fB--backupdataset\fR, gives a
 specific destination for the backup, whith may be outside
@@ -331,14 +346,35 @@ give \fB--sshcmd\fR in this case.  For
 instance: \fBsimplesnap --local --store
 /bakfs/simplesnap --host server1 --setname bak1\fR
 .TP
+\fB--noreap \fR
+Skips the usual reaping of old \fBsimplesnap\fR-generated snapshots
+on the destination after a successful receive.  Useful when the
+destination is not actually ZFS, or in conjunction with a later
+--reaponly.
+
+This has no impact on the reaping of old \fBsimplesnap\fR-generated
+snapshots on the host being backed up; that reaping will continue as
+usual.
+.TP
 \fB--sshcmd \fICOMMAND\fB \fR
 Gives the command to use to connect to the remote host.
 Defaults to "ssh".  It may be used to select an
 alternative configuration file or keypair.  Remember to
-quote it per your shell if it contains spaces.  For example: 
+quote it per your shell if it contains spaces.  For example:
 --sshcmd "ssh -i /root/.id_rsa_simplesnap".  This command
 is ignored when \fB--local\fR or
 \fB--check\fR is given.
+.TP
+\fB--receivecmd \fICOMMAND\fB \fR
+Gives the command to use to receive a ZFS dataset; defaults to
+"/sbin/zfs receive -F -x mountpoint", which destroys any
+local changes (due to the -F) and prevents remote backups from
+dictating local mointpoints (thanks to the -x).
+
+This command does not have to actually be zfs; for instance,
+in certain situations, it may be valuable to queue the data
+or save it off in a file for use on a non-ZFS target.  In those
+cases, --noreap should also be given.
 .TP
 \fB--setname \fISETNAME\fB\fR
 Gives the backup set name.  Can just be a made-up word if
