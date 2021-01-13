@@ -33,7 +33,7 @@ Description: Simple and powerful network transmission of ZFS snapshots
  simplesnap  is robust in the face of interrupted
  transfers, and needs little help to keep running.
  .
- nlike many similar tools, simplesnap does not
+ Unlike many similar tools, simplesnap does not
  require full root access to the machines being backed up. It
  runs only a small wrapper as root, and the wrapper has only three
  commands it implements.
