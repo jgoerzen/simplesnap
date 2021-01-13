@@ -458,16 +458,13 @@ CLASS="REPLACEABLE"
 >SETNAME</I
 ></TT
 >,
-        leaving only the most recent.  This is a separate operation in
+        leaving only the most recent.
+        This is a separate operation in
         <B
 CLASS="COMMAND"
 >simplesnapwrap</B
 > ensuring that even if the transmission is interrupted,
-        still it will be OK in the end because <B
-CLASS="COMMAND"
->zfs receive -F</B
-> is used, and the
-        data will come across next time.
+        still it will be OK in the end.
       </P
 ><P
 >        The idea is that some system like <B
@@ -483,7 +480,7 @@ CLASS="COMMAND"
 ><DIV
 CLASS="REFSECT1"
 ><A
-NAME="AEN145"
+NAME="AEN144"
 ></A
 ><H2
 >Quick Start</H2
@@ -680,7 +677,7 @@ CLASS="REPLACEABLE"
 ><DIV
 CLASS="REFSECT1"
 ><A
-NAME="AEN197"
+NAME="AEN196"
 ></A
 ><H2
 >Advanced: SETNAME usage</H2
@@ -712,7 +709,7 @@ CLASS="REPLACEABLE"
 ><DIV
 CLASS="REFSECT1"
 ><A
-NAME="AEN203"
+NAME="AEN202"
 ></A
 ><H2
 >Advanced: ZFS bookmarks</H2
@@ -759,7 +756,7 @@ CLASS="APPLICATION"
 ><DIV
 CLASS="REFSECT1"
 ><A
-NAME="AEN214"
+NAME="AEN213"
 ></A
 ><H2
 >Options</H2
@@ -1025,9 +1022,9 @@ CLASS="REPLACEABLE"
 ><DD
 ><P
 >              Gives the command to use to receive a ZFS dataset; defaults to
-              "/sbin/zfs receive -F -x mountpoint", which destroys any
-              local changes (due to the -F) and prevents remote backups from
-              dictating local mointpoints (thanks to the -x).
+              "/sbin/zfs receive -u -o readonly=on mountpoint".  It is strongly
+              recommended to never access the backed up datasets directly, but
+              rather to use clones.
             </P
 ><P
 >              This command does not have to actually be zfs; for instance,
@@ -1109,7 +1106,7 @@ CLASS="FILENAME"
 ><DIV
 CLASS="REFSECT1"
 ><A
-NAME="AEN316"
+NAME="AEN315"
 ></A
 ><H2
 >Backup Interrogation</H2
@@ -1124,7 +1121,7 @@ CLASS="APPLICATION"
 ><DIV
 CLASS="REFSECT2"
 ><A
-NAME="AEN320"
+NAME="AEN319"
 ></A
 ><H3
 >Space used per host</H3
@@ -1168,7 +1165,7 @@ CLASS="PARAMETER"
 ><DIV
 CLASS="REFSECT2"
 ><A
-NAME="AEN330"
+NAME="AEN329"
 ></A
 ><H3
 >Space used by a host</H3
@@ -1255,7 +1252,7 @@ NAME                         AVAIL   USED  USEDSNAP  USEDDS  USEDCHILD
 ><DIV
 CLASS="REFSECT2"
 ><A
-NAME="AEN342"
+NAME="AEN341"
 ></A
 ><H3
 >Viewing snapshots of a dataset</H3
@@ -1306,7 +1303,7 @@ NAME                                              USED  AVAIL  REFER
 ><DIV
 CLASS="REFSECT2"
 ><A
-NAME="AEN349"
+NAME="AEN348"
 ></A
 ><H3
 >Finding what changed over time</H3
@@ -1361,14 +1358,14 @@ R	/tank/store/host2/rpool/host2-1/var/cache/apt/pkgcache.bin.KdsMLu -&#62; /tank
 ><DIV
 CLASS="REFSECT1"
 ><A
-NAME="AEN357"
+NAME="AEN356"
 ></A
 ><H2
 >Warnings, Cautions, and Good Practices</H2
 ><DIV
 CLASS="REFSECT2"
 ><A
-NAME="AEN359"
+NAME="AEN358"
 ></A
 ><H3
 >Importance of Testing</H3
@@ -1386,32 +1383,33 @@ CLASS="APPLICATION"
 ><DIV
 CLASS="REFSECT2"
 ><A
-NAME="AEN363"
+NAME="AEN362"
 ></A
 ><H3
->Use of zfs receive -F</H3
+>Use of zfs receive and security implications</H3
 ><P
 >        In order to account for various situations that could lead to
         divergence of filesystems, including the simple act of mounting
         them, <SPAN
 CLASS="APPLICATION"
 >simplesnap</SPAN
-> always uses <B
+> uses <B
 CLASS="COMMAND"
 >zfs receive
-          -F</B
->.  Any local changes you make to the <SPAN
-CLASS="APPLICATION"
->simplesnap</SPAN
->
-        store datasets will be lost at any time.  If you need to make
-        local changes there, it is best to copy them elsewhere.
+          -u -o readonly=on</B
+>.
+      </P
+><P
+>        You are strongly encouraged to import your backuphost zpool with -R, or
+        at least -N, to prevent a malicious mountpoint property on the sending
+        side from causing unexpected effects on the backuphost.  Further,
+        accessing the backed-up data should always be done via clone.
       </P
 ></DIV
 ><DIV
 CLASS="REFSECT2"
 ><A
-NAME="AEN369"
+NAME="AEN368"
 ></A
 ><H3
 >Extraneous Snapshot Buildup</H3
@@ -1444,7 +1442,7 @@ CLASS="COMMAND"
 ><DIV
 CLASS="REFSECT2"
 ><A
-NAME="AEN376"
+NAME="AEN375"
 ></A
 ><H3
 >Internal simplesnap snapshots</H3
@@ -1468,7 +1466,7 @@ CLASS="REPLACEABLE"
 ><DIV
 CLASS="REFSECT1"
 ><A
-NAME="AEN381"
+NAME="AEN380"
 ></A
 ><H2
 >Bugs</H2
@@ -1521,7 +1519,7 @@ CLASS="COMMAND"
 ><DIV
 CLASS="REFSECT1"
 ><A
-NAME="AEN392"
+NAME="AEN391"
 ></A
 ><H2
 >See Also</H2
@@ -1560,7 +1558,7 @@ TARGET="_top"
 ><DIV
 CLASS="REFSECT1"
 ><A
-NAME="AEN403"
+NAME="AEN402"
 ></A
 ><H2
 >AUTHOR</H2

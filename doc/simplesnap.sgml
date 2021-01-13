@@ -255,10 +255,10 @@ manpage.1: manpage.sgml
         After the backuphost has observed <command>zfs receive</command> exiting without error,
         it contacts <command>simplesnapwrap</command> once more and requests the "reap"
         operation.  This cleans up the old snapshots for the given <replaceable>SETNAME</replaceable>,
-        leaving only the most recent.  This is a separate operation in
+        leaving only the most recent.
+        This is a separate operation in
         <command>simplesnapwrap</command> ensuring that even if the transmission is interrupted,
-        still it will be OK in the end because <command>zfs receive -F</command> is used, and the
-        data will come across next time.
+        still it will be OK in the end.
       </para>
 
       <para>
@@ -604,9 +604,9 @@ no-port-forwarding,no-X11-forwarding,no-pty ssh-rsa AAAA....
             <replaceable>COMMAND</replaceable></option>
           <listitem><para>
               Gives the command to use to receive a ZFS dataset; defaults to
-              "/sbin/zfs receive -F -x mountpoint", which destroys any
-              local changes (due to the -F) and prevents remote backups from
-              dictating local mointpoints (thanks to the -x).
+              "/sbin/zfs receive -u -o readonly=on mountpoint".  It is strongly
+              recommended to never access the backed up datasets directly, but
+              rather to use clones.
             </para>
             <para>
               This command does not have to actually be zfs; for instance,
@@ -879,15 +879,20 @@ R	/tank/store/host2/rpool/host2-1/var/cache/apt/pkgcache.bin.KdsMLu -> /tank/sto
       </para>
     </refsect2>
     <refsect2>
-      <title>Use of zfs receive -F</title>
+      <title>Use of zfs receive and security implications</title>
       <para>
         In order to account for various situations that could lead to
         divergence of filesystems, including the simple act of mounting
-        them, &simplesnap; always uses <command>zfs receive
-          -F</command>.  Any local changes you make to the &simplesnap;
-        store datasets will be lost at any time.  If you need to make
-        local changes there, it is best to copy them elsewhere.
+        them, &simplesnap; uses <command>zfs receive
+          -u -o readonly=on</command>.
       </para>
+      <para>
+        You are strongly encouraged to import your backuphost zpool with -R, or
+        at least -N, to prevent a malicious mountpoint property on the sending
+        side from causing unexpected effects on the backuphost.  Further,
+        accessing the backed-up data should always be done via clone.
+      </para>
+
     </refsect2>
     <refsect2>
       <title>Extraneous Snapshot Buildup</title>

@@ -3,7 +3,7 @@
 .\" <http://shell.ipoline.com/~elmert/comp/docbook2X/> 
 .\" Please send any bug reports, improvements, comments, patches, 
 .\" etc. to Steve Cheng <steve@ggi-project.org>.
-.TH "SIMPLESNAP" "8" "29 December 2020" "" ""
+.TH "SIMPLESNAP" "8" "13 January 2021" "" ""
 
 .SH NAME
 simplesnap \- Simple and powerful way to send ZFS snapshots across a    network
@@ -137,10 +137,10 @@ snapshot from that setname as the basis for zfs send -I.
 After the backuphost has observed \fBzfs receive\fR exiting without error,
 it contacts \fBsimplesnapwrap\fR once more and requests the "reap"
 operation.  This cleans up the old snapshots for the given \fISETNAME\fR,
-leaving only the most recent.  This is a separate operation in
+leaving only the most recent.
+This is a separate operation in
 \fBsimplesnapwrap\fR ensuring that even if the transmission is interrupted,
-still it will be OK in the end because \fBzfs receive -F\fR is used, and the
-data will come across next time.
+still it will be OK in the end.
 .PP
 The idea is that some system like \fBzfSnap\fR will be used on both ends to
 make periodic snapshots and clean them up.  One can use careful prefix
@@ -367,9 +367,9 @@ is ignored when \fB--local\fR or
 .TP
 \fB--receivecmd \fICOMMAND\fB \fR
 Gives the command to use to receive a ZFS dataset; defaults to
-"/sbin/zfs receive -F -x mountpoint", which destroys any
-local changes (due to the -F) and prevents remote backups from
-dictating local mointpoints (thanks to the -x).
+"/sbin/zfs receive -u -o readonly=on mountpoint".  It is strongly
+recommended to never access the backed up datasets directly, but
+rather to use clones.
 
 This command does not have to actually be zfs; for instance,
 in certain situations, it may be valuable to queue the data
@@ -589,14 +589,17 @@ relied upon to serve its intended purpose.  This item is not
 \fBsimplesnap\fR-specific, but pertains to every backup solution:
 test that you are backing up the data you expect to before you
 need it.
-.SS "USE OF ZFS RECEIVE -F"
+.SS "USE OF ZFS RECEIVE AND SECURITY IMPLICATIONS"
 .PP
 In order to account for various situations that could lead to
 divergence of filesystems, including the simple act of mounting
-them, \fBsimplesnap\fR always uses \fBzfs receive
--F\fR\&.  Any local changes you make to the \fBsimplesnap\fR
-store datasets will be lost at any time.  If you need to make
-local changes there, it is best to copy them elsewhere.
+them, \fBsimplesnap\fR uses \fBzfs receive
+-u -o readonly=on\fR\&.
+.PP
+You are strongly encouraged to import your backuphost zpool with -R, or
+at least -N, to prevent a malicious mountpoint property on the sending
+side from causing unexpected effects on the backuphost.  Further,
+accessing the backed-up data should always be done via clone.
 .SS "EXTRANEOUS SNAPSHOT BUILDUP"
 .PP
 Since \fBsimplesnap\fR sends all snapshots, it is possible that

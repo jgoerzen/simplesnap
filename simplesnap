@@ -84,7 +84,7 @@ Optional:
              Not usually relevant, since this is set in
              ~/.ssh/authorized_keys.  Default: "simplesnapwrap"
   --receivecmd: Gives the command to use to receive the ZFS data.  Default:
-             --receivecmd "/zbin/zfs receive -F -u -o readonly=on"
+             --receivecmd "/zbin/zfs receive -u -o readonly=on"
   --local: The host is localhost; do not use remote tool to access it.
   --backupdataset: Back up only the specified dataset instead of all.
   --datasetdest: Valid only with --backupdataset; store the backup in
