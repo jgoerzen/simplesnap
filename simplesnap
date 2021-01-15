@@ -267,7 +267,7 @@ reaponlybackups () {
   DATASETS="`runzfs list -t filesystem,volume -o name -H -r \"${STORE}/${REAPHOST}\"`"
   for REAPDS in ${DATASETS}; do
     # Don't reap the top-level host dataset itself.
-    if [ "${REAPDS}" = "${STORE}/${CHECKHOST}" ]; then
+    if [ "${REAPDS}" = "${STORE}/${REAPHOST}" ]; then
         continue
     fi
 
