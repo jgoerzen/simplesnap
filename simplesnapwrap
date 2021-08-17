@@ -48,7 +48,7 @@ SED="gsed"
 gsed &> /dev/null || SED="sed"
 GREP="ggrep"
 ggrep &> /dev/null || GREP="grep"
-
+PV="pv"
 
 # template - $1
 # dataset - $2
@@ -118,19 +118,35 @@ if [ "$1" = "reinvoked" ]; then
        logit "Making snapshot ${NEWFULLSNAP}"
        $ZFS snapshot "${NEWFULLSNAP}"
 
+       # simplesnap requested tranmission bandwidth
+       LIMIT="$3"
+       # check if pv is installed, if not discard limit to keep things working
+       pv -V &> /dev/null || LIMIT=""
        if [ -z "${OLDESTSNAP}" ]; then
          # No existing snapshot.  Send the whole thing.
          logit "Sending non-incremental stream."
-         $ZFS send "${NEWFULLSNAP}"
+         if [ -z "$LIMIT" ]; then
+           $ZFS send "${NEWFULLSNAP}"
+         else
+           $ZFS send "${NEWFULLSNAP}" | $PV -L "$LIMIT"
+         fi
        else
          # Use the oldest existing snapshot.
          logit "Sending incremental stream back to ${OLDESTSNAP}"
          if [ "${USINGBOOKMARK}" = "1" ]; then
              # bookmarks don't support -I.
              # see https://github.com/zfsonlinux/zfs/issues/7263
+           if [ -z "$LIMIT" ]; then
              $ZFS send -i "${OLDESTSNAP}" "${NEWFULLSNAP}"
+           else
+             $ZFS send -i "${OLDESTSNAP}" "${NEWFULLSNAP}" | $PV -L "$LIMIT"
+           fi
          else
+           if [ -z "$LIMIT" ]; then
              $ZFS send -I "${OLDESTSNAP}" "${NEWFULLSNAP}"
+           else
+             $ZFS send -I "${OLDESTSNAP}" "${NEWFULLSNAP}" | $PV -L "$LIMIT"
+           fi
          fi
        fi
 
@@ -150,7 +166,7 @@ if [ "$1" = "reinvoked" ]; then
        echo "_${DATASET}" | $GREP -vq " " || exiterror "Space found in dataset name"
        [ -z "${DATASET}" ] && exiterror "No dataset given."
        [ -z "$1" ] && exiterror "No template given."
-        
+
        # We always save the most recent.
        SNAPSTOREMOVE="`listsnaps \"${TEMPLATE}\" \"${DATASET}\" | head -n -1`"
        if [ -z "${SNAPSTOREMOVE}" ]; then
