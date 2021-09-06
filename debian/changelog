@@ -1,7 +1,8 @@
 simplesnap (2.1.0) unstable; urgency=medium
 
   * Fix typo in control.  Closes: #902845.
-  * Change zfs receive default to -u -o readonly=on and document security considerations
+  * Change zfs receive default to -u -o readonly=on and document security
+    considerations
 
  -- John Goerzen <jgoerzen@complete.org>  Wed, 13 Jan 2021 00:27:20 -0600
 
