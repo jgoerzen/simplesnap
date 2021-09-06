@@ -10,9 +10,8 @@
 #export DH_VERBOSE=1
 
 %:
-	dh $@ 
+	dh $@
 
 override_dh_auto_install-indep:
 	install -m 0755 -g root -o root simplesnap debian/simplesnap/usr/sbin/
 	install -m 0755 -g root -o root simplesnapwrap debian/simplesnap/usr/sbin/
-

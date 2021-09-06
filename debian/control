@@ -2,8 +2,8 @@ Source: simplesnap
 Section: admin
 Priority: optional
 Maintainer: John Goerzen <jgoerzen@complete.org>
-Build-Depends: debhelper (>= 8.0.0)
-Standards-Version: 4.1.0
+Build-Depends: debhelper-compat (= 13)
+Standards-Version: 4.1.1
 Homepage: https://github.com/jgoerzen/simplesnap
 Vcs-Git: https://github.com/jgoerzen/simplesnap.git
 Vcs-Browser: https://github.com/jgoerzen/simplesnap
