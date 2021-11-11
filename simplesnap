@@ -192,7 +192,7 @@ echo "_${SETNAME}" | $GREP -qv '^_-' || syntaxerror "Set name cannot begin with 
 TEMPLATE="__simplesnap_${SETNAME}_"
 [ -n "$DATASETDEST" -a -z "$BACKUPDATASET" ] && syntaxerror "--datasetdest given without --backupdataset"
 
-MOUNTPOINT="`zfs list -H -o mountpoint -t filesystem \"${STORE}\"`"
+MOUNTPOINT="`/sbin/zfs list -H -o mountpoint -t filesystem \"${STORE}\"`"
 
 logit "Store ${STORE} is mounted at ${MOUNTPOINT}"
 
