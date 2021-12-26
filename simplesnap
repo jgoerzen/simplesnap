@@ -99,6 +99,7 @@ Optional:
             simplesnap snapshots on the destination.
   --reaponly: Do not back up, but perform the reap operation on existing
               backups.
+  --limit: Limit transfer speed (this argument is passed to "pv -L" on the HOST (e.g. 100K,1M,10M,100M)
 EOF
   exiterror "Syntax error: $1"
 }
@@ -157,6 +158,10 @@ while [ -n "$1" ]; do
     "--reaponly")
       REAPONLYMODE="on"
       shift
+      ;;
+    "--limit")
+      LIMIT="$2"
+      shift 2
       ;;
     *)
       syntaxerror "Unknown option \"$1\""
@@ -332,7 +337,7 @@ backupto() {
         exiterror "Dataset \"$DATASET\" contains ..; something is wrong.  Aborting."
     fi
 
-    if runwrap sendback "${SETNAME}" "${DATASET}" | \
+    if runwrap sendback "${SETNAME}" "${DATASET}" "${LIMIT}"| \
         runcommand ${RECEIVECMD} "${DESTDIR}"; then
 
         logit "Received backup into ${DESTDIR}"
@@ -343,7 +348,7 @@ backupto() {
     else
         logerror "zfs receive died with error: $?"
         exit 100
-    fi        
+    fi
 }
 
 # If the user requested only one dataset to be backed up:
