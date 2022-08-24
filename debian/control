@@ -1,5 +1,5 @@
 Source: simplesnap
-Section: admin
+Section: contrib/admin
 Priority: optional
 Maintainer: John Goerzen <jgoerzen@complete.org>
 Build-Depends: debhelper-compat (= 13)
@@ -10,7 +10,7 @@ Vcs-Browser: https://github.com/jgoerzen/simplesnap
 
 Package: simplesnap
 Architecture: all
-Depends: ${misc:Depends}, zfs-fuse | zfsutils-linux | zfsutils, liblockfile-bin
+Depends: ${misc:Depends}, zfsutils-linux | zfs-fuse | zfsutils, liblockfile-bin
 Suggests: zfsnap
 Description: Simple and powerful network transmission of ZFS snapshots
  simplesnap is a simple way to send ZFS snapshots across a net‐
