@@ -42,13 +42,16 @@ runzfs () {
   fi
 }
 
-DATE="gdate"
-gdate &> /dev/null || DATE="date"
-SED="gsed"
-gsed &> /dev/null || SED="sed"
-GREP="ggrep"
-ggrep &> /dev/null || GREP="grep"
-PV="pv"
+if [ "$(uname)" = Darwin ] ; then
+   PATH=$PATH:/usr/local/bin
+   ZFSCMD="zfs"
+fi
+
+# POSIX compatible program validation
+command -v gdate > /dev/null && DATE="gdate" || DATE="date"
+command -v gsed  > /dev/null && SED="gsed"   || SED="sed"
+command -v ggrep > /dev/null && GREP="ggrep" || GREP="grep"
+command -v ghead > /dev/null && HEAD="ghead" || HEAD="head"
 
 # template - $1
 # dataset - $2
@@ -65,14 +68,14 @@ listbookmarks () {
 PATTERN="^[a-zA-Z0-9_/. -]\+\$"
 if [ "$1" = "reinvoked" ]; then
   shift
-  logit "Reinvoked with paramaters \"$*\""
+  logit "Reinvoked with parameters \"$*\""
   shift # Drop the call to simplesnapwrap
 
   # Validate again.  Just to be sure.
   echo ".$*" | $GREP -q "${PATTERN}" || exiterror "Invalid characters found on re-validate; pattern is ${PATTERN}"
   echo ".$*" | $GREP -vq '\.\.' || exiterror "Found .. in input; aborting."
 
-  # We don't want any paramaters to contain a space or leading dash.
+  # We don't want any parameters to contain a space or leading dash.
   for ARG; do
     echo ",${ARG}" | $GREP -vq '^,-' || exiterror "Found leading '-' in parameter \"${ARG}\"; aborting."
     echo ",${ARG}" | $GREP -vq ' ' || exiterror "Found space in parameters; aborting."
@@ -98,7 +101,7 @@ if [ "$1" = "reinvoked" ]; then
        logit "Listing snapshots on \"${DATASET}\" with template \"${TEMPLATE}\""
 
        USINGBOOKMARK=0
-       OLDESTSNAP="`listsnaps \"${TEMPLATE}\" \"${DATASET}\" | head -n 1`"
+       OLDESTSNAP="`listsnaps \"${TEMPLATE}\" \"${DATASET}\" | $HEAD -n 1`"
        if [ -z "${OLDESTSNAP}" ]; then
          logit "Found no existing snapshot, looking for a bookmark."
          OLDESTSNAP="`listbookmarks \"${TEMPLATE}\" \"${DATASET}\" | head -n 1`"
@@ -168,7 +171,7 @@ if [ "$1" = "reinvoked" ]; then
        [ -z "$1" ] && exiterror "No template given."
 
        # We always save the most recent.
-       SNAPSTOREMOVE="`listsnaps \"${TEMPLATE}\" \"${DATASET}\" | head -n -1`"
+       SNAPSTOREMOVE="`listsnaps \"${TEMPLATE}\" \"${DATASET}\" | $HEAD -n -1`"
        if [ -z "${SNAPSTOREMOVE}" ]; then
          logit "No snapshots to remove."
        else
