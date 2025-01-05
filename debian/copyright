@@ -3,11 +3,11 @@ Upstream-Name: simplesnap
 Source: <url:https://github.com/jgoerzen/simplesnap>
 
 Files: *
-Copyright: 2014 John Goerzen <jgoerzen@complete.org>
+Copyright: 2014-2025 John Goerzen <jgoerzen@complete.org>
 License: GPL-3.0+
 
 Files: debian/*
-Copyright: 2014 John Goerzen <jgoerzen@complete.org>
+Copyright: 2014-2025 John Goerzen <jgoerzen@complete.org>
 License: GPL-3.0+
 
 License: GPL-3.0+
