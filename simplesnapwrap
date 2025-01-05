@@ -52,6 +52,7 @@ command -v gdate > /dev/null && DATE="gdate" || DATE="date"
 command -v gsed  > /dev/null && SED="gsed"   || SED="sed"
 command -v ggrep > /dev/null && GREP="ggrep" || GREP="grep"
 command -v ghead > /dev/null && HEAD="ghead" || HEAD="head"
+command -v pv    > /dev/null && PV="pv"      || PV=""
 
 # template - $1
 # dataset - $2
