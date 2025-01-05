@@ -42,7 +42,7 @@ runzfs () {
   fi
 }
 
-if [ "$(uname)" = Darwin ] ; then
+if [ "$(uname)" = "Darwin" ] ; then
    PATH=$PATH:/usr/local/bin
    ZFSCMD="zfs"
 fi
@@ -101,10 +101,10 @@ if [ "$1" = "reinvoked" ]; then
        logit "Listing snapshots on \"${DATASET}\" with template \"${TEMPLATE}\""
 
        USINGBOOKMARK=0
-       OLDESTSNAP="`listsnaps \"${TEMPLATE}\" \"${DATASET}\" | $HEAD -n 1`"
+       OLDESTSNAP="`listsnaps \"${TEMPLATE}\" \"${DATASET}\" | ${HEAD} -n 1`"
        if [ -z "${OLDESTSNAP}" ]; then
          logit "Found no existing snapshot, looking for a bookmark."
-         OLDESTSNAP="`listbookmarks \"${TEMPLATE}\" \"${DATASET}\" | head -n 1`"
+         OLDESTSNAP="`listbookmarks \"${TEMPLATE}\" \"${DATASET}\" | ${HEAD} -n 1`"
          if [ -z "${OLDESTSNAP}" ]; then
            logit "Found no existing bookmark either; will send full stream."
          else
@@ -171,7 +171,7 @@ if [ "$1" = "reinvoked" ]; then
        [ -z "$1" ] && exiterror "No template given."
 
        # We always save the most recent.
-       SNAPSTOREMOVE="`listsnaps \"${TEMPLATE}\" \"${DATASET}\" | $HEAD -n -1`"
+       SNAPSTOREMOVE="`listsnaps \"${TEMPLATE}\" \"${DATASET}\" | ${HEAD} -n -1`"
        if [ -z "${SNAPSTOREMOVE}" ]; then
          logit "No snapshots to remove."
        else
@@ -183,7 +183,7 @@ if [ "$1" = "reinvoked" ]; then
        fi
 
        # We always save the most recent.
-       BOOKSTOREMOVE="`listbookmarks \"${TEMPLATE}\" \"${DATASET}\" | head -n -1`"
+       BOOKSTOREMOVE="`listbookmarks \"${TEMPLATE}\" \"${DATASET}\" | ${HEAD} -n -1`"
        if [ -z "${BOOKSTOREMOVE}" ]; then
          logit "No bookmarks to remove."
        else
