@@ -125,10 +125,10 @@ if [ "$1" = "reinvoked" ]; then
        if [ -z "${OLDESTSNAP}" ]; then
          # No existing snapshot.  Send the whole thing.
          logit "Sending non-incremental stream."
-         if [ -z "$LIMIT" ]; then
+         if [ -z "${LIMIT}" ]; then
            $ZFS send "${NEWFULLSNAP}"
          else
-           $ZFS send "${NEWFULLSNAP}" | $PV -L "$LIMIT"
+           $ZFS send "${NEWFULLSNAP}" | $PV -L "${LIMIT}"
          fi
        else
          # Use the oldest existing snapshot.
@@ -139,13 +139,13 @@ if [ "$1" = "reinvoked" ]; then
            if [ -z "$LIMIT" ]; then
              $ZFS send -i "${OLDESTSNAP}" "${NEWFULLSNAP}"
            else
-             $ZFS send -i "${OLDESTSNAP}" "${NEWFULLSNAP}" | $PV -L "$LIMIT"
+             $ZFS send -i "${OLDESTSNAP}" "${NEWFULLSNAP}" | $PV -L "${LIMIT}"
            fi
          else
-           if [ -z "$LIMIT" ]; then
+           if [ -z "${LIMIT}" ]; then
              $ZFS send -I "${OLDESTSNAP}" "${NEWFULLSNAP}"
            else
-             $ZFS send -I "${OLDESTSNAP}" "${NEWFULLSNAP}" | $PV -L "$LIMIT"
+             $ZFS send -I "${OLDESTSNAP}" "${NEWFULLSNAP}" | $PV -L "${LIMIT}"
            fi
          fi
        fi
